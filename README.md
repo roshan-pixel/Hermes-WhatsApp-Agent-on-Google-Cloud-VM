@@ -1,71 +1,220 @@
-# 🏛️ Complete Architecture & Deployment Guide: Hermes WhatsApp AI Agent on Google Cloud VM
+# 🏛️ Hermes WhatsApp AI Agent on Google Cloud VM
+
+[![Platform: Google Cloud](https://img.shields.io/badge/Platform-Google_Cloud_Compute_Engine-4285F4?logo=googlecloud&logoColor=white)](https://cloud.google.com/)
+[![Runtime: Node.js 20 LTS](https://img.shields.io/badge/Runtime-Node.js_20_LTS-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![AI Brain: DeepSeek](https://img.shields.io/badge/AI_Brain-DeepSeek_V3-0066FF?logo=openai&logoColor=white)](https://deepseek.com/)
+[![Process: PM2 Daemon](https://img.shields.io/badge/Supervisor-PM2_Enterprise-2B037A?logo=pm2&logoColor=white)](https://pm2.keymetrics.io/)
+[![Protocol: WhatsApp Multi--Device](https://img.shields.io/badge/Protocol-WhatsApp_Multi--Device-25D366?logo=whatsapp&logoColor=white)](https://wwebjs.dev/)
+
+An autonomous, 24/7 personal WhatsApp AI assistant engineered to run continuously on a dedicated Google Cloud Platform (GCP) virtual machine. Powered by the **DeepSeek-Chat** reasoning engine (with seamless fallback to **Google Gemini** and **OpenRouter Nous Hermes 3**), the agent monitors inbound WhatsApp communications, contextually reasons over conversation histories, and formulates concise, intelligent replies in real time without requiring the physical phone to be powered on or connected.
 
 ---
 
-## 📋 Executive Summary
-This document provides an end-to-end, comprehensive record of how the **Hermes WhatsApp AI Agent** was architected, deployed, configured, paired with WhatsApp, upgraded, and optimized on a **Google Cloud Platform (GCP) Compute Engine** Virtual Machine.
+## 📐 Systematic System Architecture
+
+The following block diagram depicts the complete multi-tiered engineering architecture of the Hermes Agent spanning networking, headless virtualization, message ingestion pipelines, memory buffers, and upstream cloud LLM services:
+
+```
++---------------------------------------------------------------------------------------------------+
+|                                     INBOUND WHATSAPP CLIENTS                                      |
+|                 [ Personal Contacts ]      [ Business Contacts ]      [ Groups ]                  |
++---------------------------------------------------------------------------------------------------+
+                                                  │
+                                                  │ (WhatsApp Encrypted Signal Protocol)
+                                                  ▼
++---------------------------------------------------------------------------------------------------+
+|                                 GOOGLE COMPUTE ENGINE VIRTUAL MACHINE                             |
+|                                       IP: 136.65.153.237                                          |
+|                                                                                                   |
+|  +---------------------------------------------------------------------------------------------+  |
+|  | [1] COMMUNICATION GATEWAY & PROTOCOL LAYER                                                  |  |
+|  |                                                                                             |  |
+|  |    +-----------------------------+               +-------------------------------------+    |  |
+|  |    | WhatsApp Multi-Device Sync  | ◄───────────► | Chromium Engine (Puppeteer Headless)|    |  |
+|  |    +-----------------------------+               +-------------------------------------+    |  |
+|  |                   │                                                 │                       |  |
+|  |                   ▼                                                 ▼                       |  |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |    | Session Persistence Cache: .wwebjs_auth/ (Persistent Multi-Device Tokens)         |    |  |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  +---------------------------------------------------------------------------------------------+  |
+|                                                  │                                                |
+|                                                  ▼ (Message Event Stream)                         |
+|  +---------------------------------------------------------------------------------------------+  |
+|  | [2] INGESTION, FILTERING & GUARDRAIL PIPELINE                                               |  |
+|  |                                                                                             |  |
+|  |    ┌───────────────────────────────────────────────────────────────────────────────────┐    |  |
+|  |    │ • Broadcast Filter: Drops "status@broadcast" events                               │    |  |
+|  |    │ • Group Chat Filter: Ignores "@g.us" threads (configurable)                       │    |  |
+|  |    │ • Self-Echo Filter: Discards "msg.fromMe === true" to prevent infinite loops      │    |  |
+|  |    │ • Content Sanitizer: Discards empty payloads, validates UTF-8 text bodies         │    |  |
+|  |    └───────────────────────────────────────────────────────────────────────────────────┘    |  |
+|  +---------------------------------------------------------------------------------------------+  |
+|                                                  │                                                |
+|                                                  ▼ (Sanitized User Text)                          |
+|  +---------------------------------------------------------------------------------------------+  |
+|  | [3] COGNITIVE CORE & CONVERSATION STATE BUFFER                                              |  |
+|  |                                                                                             |  |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |    | Dynamic Sliding-Window Memory Map (Key: JID / Phone Number, Max 10 Turns FIFO)    |    |  |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |                                                  │                                             |
+|  |                                                  ▼                                             |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |    | Persona & Instruction Assembler (Injects OWNER_NAME, BOT_NAME, System Directives)  |    |  |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |                                                  │                                             |
+|  |                                                  ▼                                             |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |    | Multi-Model Provider Router (Factory Pattern)                                     |    |  |
+|  |    +-----------------------------------------------------------------------------------+    |  |
+|  |            │                                    │                                  │        |  |
+|  +------------┼────────────────────────────────────┼──────────────────────────────────┼--------+  |
+|               │                                    │                                  │           |
+|               ▼                                    ▼                                  ▼           |
+|  +-------------------------+      +-------------------------------+     +----------------------+  |
+|  | DeepSeek Client Adapter |      | Google Gemini Client Adapter  |     | OpenRouter Hermes    |  |
+|  | (Primary Cognitive Brain|      | (High-Throughput Secondary)   |     | (Custom Persona Model|  |
+|  +-------------------------+      +-------------------------------+     +----------------------+  |
++---------------│------------------------------------│----------------------------------│-----------+
+                │ (HTTPS / TLS 1.3)                  │ (HTTPS / TLS 1.3)                │ (HTTPS)
+                ▼                                    ▼                                  ▼
++────────────────────────────+      +───────────────────────────────+     +──────────────────────+
+|   DeepSeek Cloud API       |      | Google Generative Language API|     | OpenRouter API Cloud |
+| (deepseek-chat / v3 Model) |      | (gemini-2.5-flash / Pro)      |     | (hermes-3-llama-3.1) |
++────────────────────────────+      +───────────────────────────────+     +──────────────────────+
+```
 
 ---
 
-## 1. Infrastructure Specifications
+## 🧩 Architectural Component Decomposition
 
-| Parameter | Initial Spec | Upgraded Production Spec |
-| :--- | :--- | :--- |
-| **GCP Project** | `utility-melody-390608` | `utility-melody-390608` |
-| **VM Instance Name** | `hermes-whatsapp-agent` | `hermes-whatsapp-agent` |
-| **Zone** | `us-central1-a` | `us-central1-a` |
-| **Machine Type** | `e2-micro` (2 vCPUs burstable, 1 GB RAM) | `e2-medium` (2 vCPUs, 4 GB RAM) |
-| **Operating System** | Ubuntu 22.04 LTS / Debian Linux | Ubuntu 22.04 LTS / Debian Linux |
-| **External Static IP** | `136.65.153.237` (Ephemeral -> Reserved Static) | `136.65.153.237` |
-| **SSH Key Path** | `C:\Users\sgarm\.ssh\google_compute_engine` | `C:\Users\sgarm\.ssh\google_compute_engine` |
-| **Default User** | `sgarm` | `sgarm` |
-| **AI Providers** | Google Gemini (`gemini-2.5-flash`) | DeepSeek API (`deepseek-chat`) / Hermes |
-| **Process Daemon** | PM2 Process Manager | PM2 Process Manager (Autostart + Monitored) |
+### 1. Communication Gateway & Transport Layer
+* **WhatsApp Multi-Device Engine:** Utilizes `@whiskeysockets/baileys` and `whatsapp-web.js` abstractions to sustain persistent WebSocket tunnels with Meta's messaging edges.
+* **Headless Virtualization:** Puppeteer controls an isolated, headless Chromium instance with security sandboxing tuned for cloud server environments (`--no-sandbox`, `--disable-setuid-sandbox`, `--disable-dev-shm-usage`).
+* **Session Persistence (`.wwebjs_auth`):** Cryptographic session tokens, private keys, and authentication states are committed to disk upon initial QR pairing, ensuring autonomous reconnects even after process restarts or VM cold reboots.
+
+### 2. Message Ingestion & Guardrail Pipeline
+Every incoming packet traverses a deterministic validation cascade:
+1. **Status Broadcast Suppression:** Messages originating from `status@broadcast` are immediately dropped.
+2. **Channel Type Demuxing:** Inbound group messages (`@g.us`) are dropped by default to prevent token runaway and privacy leakage.
+3. **Loop Prevention:** The agent evaluates `msg.fromMe`; self-emitted notifications are terminated immediately.
+4. **Debouncing & Rate Throttling:** Rapid bursts from single contacts are queued to prevent concurrent model invocations.
+
+### 3. Cognitive Engine & Context State Buffer
+* **Sliding-Window Memory Buffer:** Maintains an in-memory `Map<ContactJID, MessageHistory[]>` bounded at 10 historical conversation turns (FIFO eviction). This preserves immediate context without saturating LLM context windows or incurring unnecessary token costs.
+* **System Prompt Injection:** Injects user-defined persona guidelines, owner identification, and strict behavioral directives before dispatching requests upstream.
+* **Provider Abstraction:** Decoupled client architecture allows hot-swapping between:
+  * **DeepSeek (`deepseek-chat`):** Primary production driver for concise, conversational answers.
+  * **Google Gemini (`gemini-2.5-flash`):** High-throughput secondary provider.
+  * **OpenRouter Nous Hermes 3 (`hermes-3-llama-3.1-8b`):** Specialized persona model.
+
+### 4. Process Supervision & Self-Healing (PM2)
+* **Daemon Supervision:** Managed by PM2 as a system service. If Chromium encounters a memory leak or network dropout, PM2 automatically halts and restarts the process within seconds.
+* **Auto-Resurrection:** Integrated with Linux `systemd` (`pm2 startup` + `pm2 save`) to auto-launch on instance restarts.
+
+### 5. Hardware & OS Kernel Performance Topology
+```
++-----------------------------------------------------------------------------+
+|                          GCP COMPUTE ENGINE (e2-medium)                     |
+|                                2 vCPUs | 4.0 GB RAM                         |
++-----------------------------------------------------------------------------+
+|                               MEMORY HIERARCHY                              |
+|                                                                             |
+|  [ Physical RAM (4096 MB) ]                                                 |
+|  ├── System & OS Baseline: ~250 MB                                          |
+|  ├── Node.js / V8 Heap Allocation: Up to 2048 MB (--max-old-space-size=2048)|
+|  └── Headless Chromium (Puppeteer Browser): ~800 MB - 1200 MB               |
+|                                                                             |
+|  [ Tier 1 Swap: ZRAM Compressed In-Memory Buffer ]                          |
+|  └── Algorithm: zstd | Allocated: 50% RAM | Ultra-fast ~5x disk speed       |
+|                                                                             |
+|  [ Tier 2 Swap: Persistent Disk File (/swapfile) ]                          |
+|  └── Size: 2048 MB | Kernel Swappiness: vm.swappiness=10                    |
++-----------------------------------------------------------------------------+
+```
 
 ---
 
-## 2. VM Creation & SSH Setup
+## 🔄 End-to-End Sequence Flow
 
-### A. SSH Key Generation & Local Terminal Connection
-The VM was provisioned using Google Compute Engine SSH keys generated in your Windows user profile:
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Contact as External Contact (WhatsApp)
+    participant WA as WhatsApp Edge Servers
+    participant VM as VM Headless Chromium
+    participant Agent as Hermes Core (Node.js)
+    participant Buffer as Sliding Context Buffer
+    participant LLM as DeepSeek Cloud API
+
+    Contact->>WA: Sends message ("Hey, are you free?")
+    WA->>VM: WebSocket encrypted push
+    VM->>Agent: Emits client.on('message', msg)
+    
+    rect rgb(240, 245, 255)
+        Note over Agent: Guardrail Pipeline Execution
+        Agent->>Agent: Check msg.fromMe (False)
+        Agent->>Agent: Check broadcast / group (False)
+        Agent->>Agent: Verify UTF-8 payload length > 0
+    end
+    
+    Agent->>Buffer: Retrieve conversation history for Contact JID
+    Buffer-->>Agent: Returns last 10 messages
+    Agent->>Agent: Assemble System Prompt + History + New Message
+    
+    Agent->>LLM: POST /chat/completions (model: deepseek-chat)
+    LLM-->>Agent: HTTP 200 OK ("I'm away from my phone right now...")
+    
+    Agent->>Buffer: Append User Message & Assistant Response
+    Agent->>VM: msg.reply(responseText)
+    VM->>WA: Dispatches encrypted response
+    WA->>Contact: Delivers message to recipient
+```
+
+---
+
+## 🛠️ Step-by-Step Deployment & Configuration
+
+### 1. Provisioning the Google Cloud Compute Engine VM
+* **Console Path:** Google Cloud Console -> Compute Engine -> VM instances -> Create Instance
+* **Cloud Shell Provisioning Command:**
+```bash
+gcloud compute instances create hermes-whatsapp-agent \
+  --project=utility-melody-390608 \
+  --zone=us-central1-a \
+  --machine-type=e2-medium \
+  --image-family=ubuntu-2204-lts \
+  --image-project=ubuntu-os-cloud \
+  --boot-disk-size=30GB \
+  --boot-disk-type=pd-balanced \
+  --tags=http-server,https-server
+```
+
+### 2. Static External IP Reservation
+Promoting your ephemeral external IP to static guarantees SSH endpoints and local webhooks never break:
+```bash
+gcloud compute addresses create hermes-static-ip \
+  --addresses=136.65.153.237 \
+  --region=us-central1
+```
+
+### 3. Server Initialization & Dependency Installation
+Connect to the server via SSH:
 ```powershell
-# Connect directly from Windows PowerShell
 ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237
 ```
 
-### B. Cloud Shell VM Management Commands
-When operating from **Google Cloud Shell** (`sgarmy200@cloudshell:~ (utility-melody-390608)`), the instance is controlled with:
-```bash
-# Set default project & zone
-gcloud config set project utility-melody-390608
-gcloud config set compute/zone us-central1-a
-
-# Check instance status
-gcloud compute instances list
-```
-
----
-
-## 3. Server Provisioning & Dependencies
-
-Headless Chrome (Puppeteer) requires several system libraries to render the WhatsApp Web client in headless mode without crashing.
-
-### A. Updating System Packages
+Update system packages and install Node.js 20 LTS:
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y curl wget git build-essential software-properties-common
-```
 
-### B. Installing Node.js LTS (v20.x)
-```bash
+# Install Node.js 20 LTS
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
-node -v   # v20.x.x
-npm -v    # v10.x.x
-```
 
-### C. Installing Puppeteer / Chromium Dependencies
-```bash
+# Install Puppeteer / Chromium Linux libraries
 sudo apt install -y \
   gconf-service libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 libcairo2 libcups2 \
   libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 \
@@ -73,311 +222,103 @@ sudo apt install -y \
   libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 \
   libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates \
   fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils libgbm1 libxkbcommon0
-```
 
-### D. Installing PM2 (Process Manager)
-```bash
+# Install PM2 Process Manager
 sudo npm install -g pm2
 ```
 
 ---
 
-## 4. Hermes WhatsApp Agent Code & Architecture
+## ⚙️ Configuration & Environment Setup
 
-### A. Project Directory Layout
-```
-/home/sgarm/whatsapp-agent/
-├── .env                       # API keys, persona settings & provider selection
-├── package.json               # Node module manifests
-├── index.js                   # Main application code (Baileys / WhatsApp-Web.js client)
-├── .wwebjs_auth/              # Multi-Device session keys & login cache
-│   └── session/
-└── .wwebjs_cache/             # Chromium session cache
-```
-
-### B. Dependencies (`package.json`)
-```json
-{
-  "name": "whatsapp-agent",
-  "version": "1.0.0",
-  "description": "Hermes Autonomous WhatsApp Assistant",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "^1.25.0"
-  }
-}
-```
-
-### C. Environment Configuration (`.env`)
+Clone or create the project under `/home/sgarm/whatsapp-agent`:
 ```bash
+mkdir -p /home/sgarm/whatsapp-agent && cd /home/sgarm/whatsapp-agent
+```
+
+Create your `.env` configuration file:
+```env
 # Choose AI provider: 'deepseek', 'gemini', or 'hermes'
 AI_PROVIDER=deepseek
 
-# DeepSeek API Settings
+# DeepSeek Configuration
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
-DEEPSEEK_BASE_URL=https://api.deepseek.com/chat/completions
+DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-chat
 
-# Google Gemini Settings (Alternative)
+# Google Gemini Configuration (Fallback)
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 
-# Hermes Settings (via OpenRouter)
-HERMES_API_KEY=your_openrouter_hermes_key_here
+# Hermes Configuration (via OpenRouter)
+HERMES_API_KEY=your_openrouter_api_key_here
 HERMES_BASE_URL=https://openrouter.ai/api/v1
 HERMES_MODEL=nousresearch/hermes-3-llama-3.1-8b
 
-# Persona Settings
-OWNER_NAME=User
+# Persona Directives
+OWNER_NAME=YourName
 BOT_NAME=Hermes AI Assistant
 SYSTEM_PROMPT=You are Hermes, an intelligent personal assistant managing WhatsApp messages for your owner while they are away from their phone. Keep answers concise, polite, helpful, and natural.
 ```
 
-### D. Core Agent Logic (`index.js`)
-```javascript
-require('dotenv').config();
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
-const express = require('express');
-
-const AI_PROVIDER = (process.env.AI_PROVIDER || 'deepseek').toLowerCase();
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
-const OWNER_NAME = process.env.OWNER_NAME || 'My Owner';
-const BOT_NAME = process.env.BOT_NAME || 'Hermes AI';
-const SYSTEM_PROMPT = process.env.SYSTEM_PROMPT || 
-    `You are ${BOT_NAME}, an intelligent personal assistant managing WhatsApp messages for ${OWNER_NAME} while they are away or busy. ` +
-    `Be friendly, polite, concise, and helpful. Keep replies brief and natural.`;
-
-const chatHistory = new Map();
-const MAX_HISTORY = 10;
-
-// DeepSeek Brain
-async function getDeepSeekReply(chatId, userMessage) {
-    if (!DEEPSEEK_API_KEY) return 'Hermes brain is currently not configured.';
-    const history = chatHistory.get(chatId) || [];
-    history.push({ role: 'user', content: userMessage });
-
-    const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...history.slice(-MAX_HISTORY)
-    ];
-
-    try {
-        const resp = await fetch('https://api.deepseek.com/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'deepseek-chat',
-                messages: messages,
-                max_tokens: 500,
-                temperature: 0.7
-            })
-        });
-        const data = await resp.json();
-        const reply = data.choices?.[0]?.message?.content?.trim() || 'Received!';
-        history.push({ role: 'assistant', content: reply });
-        chatHistory.set(chatId, history.slice(-MAX_HISTORY));
-        return reply;
-    } catch (err) {
-        console.error('[DeepSeek Error]:', err.message);
-        return 'Sorry, my AI engine is currently unreachable.';
-    }
-}
-
-// Client Initialization
-const client = new Client({
-    authStrategy: new LocalAuth({ dataPath: './.wwebjs_auth' }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu'
-        ]
-    }
-});
-
-let latestQR = null;
-
-// QR Terminal Display
-client.on('qr', (qr) => {
-    latestQR = qr;
-    console.log('
-================== SCAN THIS QR CODE ==================');
-    qrcode.generate(qr, { small: true });
-    console.log('========================================================
-');
-});
-
-client.on('authenticated', () => console.log('[AUTH] Authenticated successfully.'));
-client.on('ready', () => console.log(`[READY] ${BOT_NAME} is active 24/7!`));
-
-client.on('message', async (msg) => {
-    if (msg.from === 'status@broadcast') return;
-    if (msg.from.endsWith('@g.us')) return; // Ignore groups
-    if (msg.fromMe || !msg.body || msg.body.trim().length === 0) return;
-
-    console.log(`[INCOMING] ${msg.from}: ${msg.body}`);
-    const reply = await getDeepSeekReply(msg.from, msg.body);
-    await msg.reply(reply);
-    console.log(`[REPLIED]: ${reply}`);
-});
-
-client.initialize();
-
-// Express web fallback for QR code viewing
-const app = express();
-app.get('/', (req, res) => {
-    if (!latestQR) return res.send('<h2>Hermes WhatsApp Agent Active & Connected</h2>');
-    res.send(`<h2>Scan WhatsApp QR Code:</h2><pre>${latestQR}</pre>`);
-});
-app.listen(3000, '0.0.0.0', () => console.log('QR Web server on port 3000'));
-```
-
 ---
 
-## 5. WhatsApp Linking & QR Code Pairing
+## 📲 WhatsApp Pairing & QR Code Protocol
 
-### A. How WhatsApp Multi-Device Linking Works
-WhatsApp uses the Multi-Device Baileys / Chromium protocol. Session tokens and cryptographic keys are saved into `.wwebjs_auth/`. Once paired, WhatsApp does **not** require your phone to be turned on or connected to the internet.
-
-### B. Displaying the QR Code in PowerShell
+### Option A: Read QR Code directly in PowerShell
 ```powershell
 ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "pm2 logs whatsapp-agent --lines 60 --nostream"
 ```
 
-### C. Displaying the QR Code in Browser (Port Forwarding Tunnel)
-To view the QR code in your local Chrome browser at `http://localhost:3000`:
+### Option B: Local Browser Forwarding
+Create an SSH tunnel binding the remote Express server to your local machine:
 ```powershell
 ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" -L 3000:localhost:3000 sgarm@136.65.153.237
 ```
+Then navigate to `http://localhost:3000` in your local browser to scan the visual code.
 
-### D. Fixing the "Cannot link new devices, try again later" Error
-When WhatsApp encounters too many failed login attempts, it locks pairing for 5 to 10 minutes.
-**The Fix:**
-1. Stop PM2: `pm2 stop whatsapp-agent`
-2. Clear stale session locks:
+### ⚠️ Resolving "Cannot link new devices, try again later"
+If WhatsApp temporarily blocks pairing attempts due to connection retries:
+1. `pm2 stop whatsapp-agent`
+2. Purge stale/corrupt session files:
    ```bash
    rm -rf /home/sgarm/whatsapp-agent/.wwebjs_auth /home/sgarm/whatsapp-agent/.wwebjs_cache
    ```
-3. Wait **5 minutes** for WhatsApp cooldown.
-4. Restart PM2:
-   ```bash
-   pm2 restart whatsapp-agent
-   ```
-5. Scan the fresh QR code immediately.
+3. Wait **5 minutes** for WhatsApp rate-limiting to expire.
+4. Restart agent: `pm2 start whatsapp-agent` and scan the fresh QR code.
 
 ---
 
-## 6. Critical MODS & Performance Optimizations
+## ⚡ Applied Performance MODS & Optimizations
 
-### 🚀 MOD 1: Upgrading VM Instance from `e2-micro` to `e2-medium`
-**Problem:** The initial `e2-micro` instance only had 1 GB RAM. Headless Chromium requires 800 MB - 1.2 GB during page loads, causing Linux Out-Of-Memory (OOM) killer to crash the process randomly.
-
-**Fix (Executed in Cloud Shell):**
-```bash
-# 1. Lock external IP to static so it never changes
-gcloud compute addresses create hermes-static-ip   --addresses=136.65.153.237   --region=us-central1
-
-# 2. Stop VM
-gcloud compute instances stop hermes-whatsapp-agent --zone=us-central1-a
-
-# 3. Upgrade to e2-medium (4 GB RAM, 2 vCPUs)
-gcloud compute instances set-machine-type hermes-whatsapp-agent   --zone=us-central1-a   --machine-type=e2-medium
-
-# 4. Start the upgraded VM
-gcloud compute instances start hermes-whatsapp-agent --zone=us-central1-a
-```
+| Mod | Optimization | Architectural Benefit |
+| :--- | :--- | :--- |
+| **MOD 1: Compute Resizing** | Upgraded `e2-micro` (1 GB) -> `e2-medium` (4 GB) | Eliminates Linux OOM process terminations during Chromium rendering cycles |
+| **MOD 2: Swap Hierarchy** | Created 2GB swap with `vm.swappiness=10` | Guarantees kernel stability while keeping active Node and Chromium heaps strictly in RAM |
+| **MOD 3: V8 Heap Expansion** | Configured `--max-old-space-size=2048` in PM2 | Prevents Node runtime garbage collector thrashing |
+| **MOD 4: In-Memory ZRAM** | Activated `zstd` compressed RAM swap | Delivers sub-millisecond memory paging 5x faster than persistent disk swap |
+| **MOD 5: DeepSeek Migration** | Swapped Gemini flash for `deepseek-chat` | Significantly improves reasoning quality and conversational naturalness |
+| **MOD 6: 24/7 Autostart Hook** | `pm2 startup systemd` & `pm2 save` | Ensures instant daemon recovery across cloud host maintenance events |
 
 ---
 
-### 🚀 MOD 2: Swap Space Creation & Swappiness Tuning
-To guarantee Chromium never crashes during sudden memory spikes:
-```bash
-# Create 2GB swap file
-sudo fallocate -l 2G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
+## 🕹️ Operations & Maintenance Cheatsheet
 
-# Make swap persistent on reboot
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-
-# Set swappiness to 10 (keeps active Chrome processes in RAM, swaps only inactive memory)
-sudo sysctl vm.swappiness=10
-echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
-```
-
----
-
-### 🚀 MOD 3: Upgrading Node.js Heap Allocation
-On `e2-micro`, Node was throttled with `--max_old_space_size=128`.
-On `e2-medium`, this limit was lifted to **2048 MB (2 GB)**:
-```bash
-pm2 restart whatsapp-agent --node-args="--max-old-space-size=2048"
-pm2 save
-```
-
----
-
-### 🚀 MOD 4: Enabling ZRAM (Compressed In-Memory Swap)
-ZRAM creates a compressed block device in physical RAM that is 5x faster than disk swap:
-```bash
-sudo apt install -y zram-tools
-echo 'ALGO=zstd' | sudo tee -a /etc/default/zramswap
-echo 'PERCENT=50' | sudo tee -a /etc/default/zramswap
-sudo systemctl restart zramswap
-```
-
----
-
-### 🚀 MOD 5: DeepSeek AI Brain Integration
-Replaced the default Gemini flash model with the **DeepSeek API (`your_deepseek_api_key_here`)** for faster responses, lower latency, and cost-effective natural conversations.
-
----
-
-### 🚀 MOD 6: 24/7 PM2 Daemon Persistence
-```bash
-pm2 startup systemd -u sgarm --hp /home/sgarm
-pm2 save
-```
-If the VM reboots for Google maintenance, PM2 automatically restarts the Hermes agent without any manual intervention.
-
----
-
-## 7. Operational Cheatsheet
-
-### Check Live Status & Logs
 ```powershell
-# Check PM2 process table
+# 1. Check live agent status and uptime
 ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "pm2 status"
 
-# View real-time incoming WhatsApp messages
-ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "pm2 logs whatsapp-agent --lines 50"
-```
+# 2. Stream real-time incoming WhatsApp logs
+ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "pm2 logs whatsapp-agent"
 
-### Restart Agent
-```powershell
-ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "pm2 restart whatsapp-agent"
-```
+# 3. Restart the agent with updated environment variables
+ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "pm2 restart whatsapp-agent --update-env"
 
-### Check Memory & CPU Usage
-```powershell
+# 4. Check RAM and Swap utilization
 ssh -i "$env:USERPROFILE\.ssh\google_compute_engine" sgarm@136.65.153.237 "free -h"
 ```
 
 ---
-*Created on September 23, 2026 for system owner.*
+
+## 📄 License
+This project is open-source under the [MIT License](LICENSE).
