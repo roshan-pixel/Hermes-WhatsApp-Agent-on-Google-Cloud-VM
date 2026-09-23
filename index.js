@@ -283,6 +283,21 @@ const server = http.createServer(async (req, res) => {
         return res.end();
     }
 
+    if (pathname === '/pair-code') {
+        const phone = (parsedUrl.query.phone || '918058363027').replace(/[^\d]/g, '');
+        try {
+            console.log(`[PAIRING CODE] Requesting code for phone: ${phone}...`);
+            const pairCode = await client.requestPairingCode(phone);
+            console.log(`[PAIRING CODE] SUCCESS! Generated Code: ${pairCode}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: true, code: pairCode, phone: phone }));
+        } catch (err) {
+            console.error('[PAIRING CODE ERROR]:', err.message);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: false, error: err.message }));
+        }
+    }
+
     if (pathname === '/status') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ status: clientStatus, qr: currentQR, qrImg: currentQRDataUrl }));
@@ -476,6 +491,16 @@ const server = http.createServer(async (req, res) => {
         <div class="qr-wrap" id="qr-container">
             <div id="loading"><div class="spinner"></div>Loading latest QR Code...</div>
         </div>
+        <div style="margin-top: 18px; padding: 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; text-align: center;">
+            <h3 style="margin: 0 0 6px 0; color: #166534; font-size: 15px;">📲 Link With Phone Number Instead</h3>
+            <p style="font-size: 12px; color: #15803d; margin: 0 0 10px 0;">Don't want to scan QR? Send an 8-character OTP code directly to your phone:</p>
+            <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                <input id="phoneNumberInput" type="text" value="+918058363027" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 160px; font-weight: bold; text-align: center;" />
+                <button id="sendOtpBtn" onclick="requestPairingCode()" style="background: #008069; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">Send Code</button>
+            </div>
+            <div id="pairingCodeResult" style="margin-top: 12px; display: none;"></div>
+        </div>
+
         <div class="instructions" id="instructions">
             <ol>
                 <li>Open <b>WhatsApp</b> on your mobile phone</li>
@@ -486,6 +511,32 @@ const server = http.createServer(async (req, res) => {
         </div>
     </div>
     <script>
+        async function requestPairingCode() {
+            const btn = document.getElementById('sendOtpBtn');
+            const input = document.getElementById('phoneNumberInput');
+            const resultDiv = document.getElementById('pairingCodeResult');
+            const phone = input.value.replace(/[^\d]/g, '');
+            if (!phone) return alert('Please enter your phone number');
+            btn.disabled = true;
+            btn.innerText = 'Requesting...';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div style="color: #64748b; font-size: 13px;">Connecting to WhatsApp and requesting code...</div>';
+            try {
+                const res = await fetch('/pair-code?phone=' + phone);
+                const data = await res.json();
+                if (data.success && data.code) {
+                    resultDiv.innerHTML = '<div style="padding: 12px; background: white; border: 2px dashed #008069; border-radius: 8px;"><div style="font-size: 12px; color: #54656f; margin-bottom: 4px;">ENTER THIS CODE IN WHATSAPP:</div><div style="font-size: 28px; font-weight: 800; letter-spacing: 4px; color: #008069;">' + data.code + '</div><div style="font-size: 12px; color: #15803d; margin-top: 6px;">Check the notification on phone or enter in Linked Devices!</div></div>';
+                } else {
+                    resultDiv.innerHTML = '<div style="color: #dc2626; font-size: 13px;">Error: ' + (data.error || 'Failed to request code') + '</div>';
+                }
+            } catch(e) {
+                resultDiv.innerHTML = '<div style="color: #dc2626; font-size: 13px;">Error connecting to agent server</div>';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Send Code';
+            }
+        }
+
         let lastQR = '';
         async function checkStatus() {
             try {
