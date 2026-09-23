@@ -235,10 +235,37 @@ client.on('qr', async (qr) => {
     }
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
     clientStatus = 'CONNECTED';
     console.log(`\n[SUCCESS] ${BOT_NAME} is connected and actively listening for WhatsApp messages 24/7!`);
+    try {
+        await client.sendPresenceAvailable();
+        console.log('[PRESENCE] WhatsApp presence broadcast: ONLINE.');
+    } catch(e) {}
 });
+
+// Broadcast ONLINE presence status to WhatsApp servers continuously (every 12 seconds)
+setInterval(async () => {
+    try {
+        if (clientStatus === 'CONNECTED' && client.sendPresenceAvailable) {
+            const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
+            const activePage = pages.find(p => !p.isClosed() && p.url().includes('whatsapp.com'));
+            if (activePage && client.pupPage !== activePage) {
+                client.pupPage = activePage;
+            }
+            if (client.pupPage && !client.pupPage.isClosed()) {
+                await client.pupPage.evaluate(() => {
+                    window.dispatchEvent(new Event('focus'));
+                    document.dispatchEvent(new Event('visibilitychange'));
+                }).catch(() => {});
+            }
+            await client.sendPresenceAvailable();
+            console.log(`[PRESENCE HEARTBEAT] Broadcasted ONLINE at ${new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
+        }
+    } catch(e) {
+        console.error('[PRESENCE HEARTBEAT ERROR]:', e.message);
+    }
+}, 12000);
 
 client.on('authenticated', () => {
     clientStatus = 'AUTHENTICATED';
@@ -413,6 +440,75 @@ const server = http.createServer(async (req, res) => {
             return res.end(JSON.stringify({ success: true, to, text }));
         } catch(e) {
             console.error('[MANUAL / API SEND ERROR]:', e);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: e.message }));
+        }
+    }
+
+    if (pathname === '/online') {
+        try {
+            const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
+            const activePage = pages.find(p => !p.isClosed() && p.url().includes('whatsapp.com')) || client.pupPage;
+            if (activePage && client.pupPage !== activePage) {
+                client.pupPage = activePage;
+            }
+            if (activePage && !activePage.isClosed()) {
+                await activePage.evaluate(() => {
+                    window.dispatchEvent(new Event('focus'));
+                    document.dispatchEvent(new Event('visibilitychange'));
+                    try {
+                        const act = window.require('WAWebPresenceChatAction');
+                        if (act && act.sendPresenceAvailable) act.sendPresenceAvailable();
+                    } catch(e) {}
+                }).catch(() => {});
+            }
+            await client.sendPresenceAvailable();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: true, presence: 'ONLINE', time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }) }));
+        } catch(e) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: e.message }));
+        }
+    }
+
+    if (pathname === '/screenshot') {
+        try {
+            const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
+            const page = pages.find(p => !p.isClosed() && p.url().includes('whatsapp.com')) || client.pupPage;
+            if (page && !page.isClosed()) {
+                const img = await page.screenshot({ type: 'png' });
+                res.writeHead(200, { 'Content-Type': 'image/png' });
+                return res.end(img);
+            } else {
+                res.writeHead(503, { 'Content-Type': 'text/plain' });
+                return res.end('Puppeteer page not ready');
+            }
+        } catch(e) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            return res.end(e.message);
+        }
+    }
+
+    if (pathname === '/debug') {
+        try {
+            const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
+            const info = [];
+            for (let i = 0; i < pages.length; i++) {
+                const p = pages[i];
+                try {
+                    info.push({
+                        index: i,
+                        closed: p.isClosed(),
+                        url: p.url(),
+                        title: p.isClosed() ? 'closed' : await p.title()
+                    });
+                } catch(pe) {
+                    info.push({ index: i, error: pe.message });
+                }
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ clientStatus, pagesCount: pages.length, pages: info }, null, 2));
+        } catch(e) {
             res.writeHead(500, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ error: e.message }));
         }
