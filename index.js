@@ -264,27 +264,47 @@ client.on('message', async (msg) => {
     const incomingText = msg.body.trim();
 
     // ─── STRICT WHITELIST: Only reply to 9358706440 (Himanshi) & 8529911832 (Roshan) ───
-    const allowedLIDs = ['235429169213635@lid', '254975783530728@lid'];
+    const allowedLIDs = [
+        '237413007929354@lid', // Himanshi Parihar (Active LID)
+        '235429169213635@lid', // Himanshi Parihar (Secondary LID)
+        '254975783530728@lid'  // Roshan Airtel
+    ];
     const allowedNumbers = ['9358706440', '8529911832', '919358706440', '918529911832'];
 
     let contactNum = '';
-    let isAllowed = allowedLIDs.includes(sender) || allowedNumbers.some(num => sender.includes(num));
-    if (!isAllowed) {
-        try {
-            const contact = await msg.getContact();
-            contactNum = (contact.number || '').replace(/[^\d]/g, '');
-            if (allowedNumbers.some(num => contactNum.includes(num))) {
-                isAllowed = true;
-            }
-        } catch(e) {}
-    }
+    let contactName = '';
+    let chatTitle = '';
+
+    try {
+        const chat = await msg.getChat();
+        chatTitle = chat.name || chat.formattedTitle || '';
+    } catch(e) {}
+
+    try {
+        const contact = await msg.getContact();
+        contactName = contact.name || contact.pushname || '';
+        contactNum = (contact.number || '').replace(/[^\d]/g, '');
+    } catch(e) {}
+
+    const isHimanshi = sender === '237413007929354@lid' ||
+                       sender === '235429169213635@lid' ||
+                       sender.includes('9358706440') ||
+                       contactNum.includes('9358706440') ||
+                       chatTitle.toLowerCase().includes('himanshi') ||
+                       contactName.toLowerCase().includes('himanshi');
+
+    const isRoshan = sender === '254975783530728@lid' ||
+                     sender.includes('8529911832') ||
+                     contactNum.includes('8529911832') ||
+                     chatTitle.toLowerCase().includes('roshan') ||
+                     contactName.toLowerCase().includes('roshan');
+
+    const isAllowed = isHimanshi || isRoshan;
 
     if (!isAllowed) {
-        console.log(`[FILTERED / IGNORED]: Message from ${sender} - Not in allowed whitelist.`);
+        console.log(`[FILTERED / IGNORED]: Message from ${sender} (Chat: "${chatTitle}", Contact: "${contactName}") - Not in allowed whitelist.`);
         return;
     }
-
-    const isHimanshi = sender === '235429169213635@lid' || sender.includes('9358706440') || (contactNum && contactNum.includes('9358706440'));
 
     let customPrompt = null;
     if (isHimanshi) {
@@ -377,6 +397,25 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/qr.svg' && currentQRSVG) {
         res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
         return res.end(currentQRSVG);
+    }
+
+    if (pathname === '/api/send') {
+        const to = parsedUrl.query.to || '235429169213635@lid';
+        const text = parsedUrl.query.text || '';
+        if (!text) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: 'Missing text parameter' }));
+        }
+        try {
+            await client.sendMessage(to, text);
+            console.log(`[MANUAL / API SEND to ${to}]: ${text}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ success: true, to, text }));
+        } catch(e) {
+            console.error('[MANUAL / API SEND ERROR]:', e);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: e.message }));
+        }
     }
 
     if (pathname === '/api/messages') {
