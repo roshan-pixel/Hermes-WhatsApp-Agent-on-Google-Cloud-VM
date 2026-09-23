@@ -259,7 +259,28 @@ client.on('message', async (msg) => {
 
     const sender = msg.from;
     const incomingText = msg.body.trim();
-    console.log(`\n[INCOMING from ${sender}]: ${incomingText}`);
+
+    // ─── STRICT WHITELIST: Only reply to 9358706440 (Himanshi) & 8529911832 (Roshan) ───
+    const allowedLIDs = ['235429169213635@lid', '254975783530728@lid'];
+    const allowedNumbers = ['9358706440', '8529911832', '919358706440', '918529911832'];
+
+    let isAllowed = allowedLIDs.includes(sender) || allowedNumbers.some(num => sender.includes(num));
+    if (!isAllowed) {
+        try {
+            const contact = await msg.getContact();
+            const contactNum = (contact.number || '').replace(/[^\d]/g, '');
+            if (allowedNumbers.some(num => contactNum.includes(num))) {
+                isAllowed = true;
+            }
+        } catch(e) {}
+    }
+
+    if (!isAllowed) {
+        console.log(`[FILTERED / IGNORED]: Message from ${sender} - Not in allowed whitelist.`);
+        return;
+    }
+
+    console.log(`\n[INCOMING from Whitelisted ${sender}]: ${incomingText}`);
 
     try {
         const reply = await generateAIReply(sender, incomingText);
