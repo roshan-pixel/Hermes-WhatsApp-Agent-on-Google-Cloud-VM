@@ -37,7 +37,7 @@ let currentQRDataUrl = null;
 let currentQRSVG = null;
 let clientStatus = 'STARTING';
 
-async function getDeepSeekReply(chatId, userMessage) {
+async function getDeepSeekReply(chatId, userMessage, customSystemPrompt = null) {
     if (!DEEPSEEK_API_KEY) {
         return "I am online, but my DeepSeek API key is not configured.";
     }
@@ -45,8 +45,9 @@ async function getDeepSeekReply(chatId, userMessage) {
     const history = chatHistory.get(chatId) || [];
     history.push({ role: 'user', content: userMessage });
 
+    const activePrompt = customSystemPrompt || SYSTEM_PROMPT;
     const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: activePrompt },
         ...history.slice(-MAX_HISTORY)
     ];
 
@@ -84,7 +85,7 @@ async function getDeepSeekReply(chatId, userMessage) {
     }
 }
 
-async function getGeminiReply(chatId, userMessage) {
+async function getGeminiReply(chatId, userMessage, customSystemPrompt = null) {
     if (!GEMINI_API_KEY) {
         return "I am currently online, but my Gemini API key has not been configured yet.";
     }
@@ -92,9 +93,10 @@ async function getGeminiReply(chatId, userMessage) {
     const history = chatHistory.get(chatId) || [];
     history.push({ role: 'user', parts: [{ text: userMessage }] });
 
+    const activePrompt = customSystemPrompt || SYSTEM_PROMPT;
     const contents = [
-        { role: 'user', parts: [{ text: `[System Instruction: ${SYSTEM_PROMPT}]` }] },
-        { role: 'model', parts: [{ text: "Understood. I will act as the personal assistant adhering strictly to these instructions." }] },
+        { role: 'user', parts: [{ text: `[System Instruction: ${activePrompt}]` }] },
+        { role: 'model', parts: [{ text: "Understood." }] },
         ...history.slice(-MAX_HISTORY)
     ];
 
@@ -132,7 +134,7 @@ async function getGeminiReply(chatId, userMessage) {
     }
 }
 
-async function getHermesReply(chatId, userMessage) {
+async function getHermesReply(chatId, userMessage, customSystemPrompt = null) {
     if (!HERMES_API_KEY) {
         return "I am currently online, but my Hermes API key has not been configured yet.";
     }
@@ -140,8 +142,9 @@ async function getHermesReply(chatId, userMessage) {
     const history = chatHistory.get(chatId) || [];
     history.push({ role: 'user', content: userMessage });
 
+    const activePrompt = customSystemPrompt || SYSTEM_PROMPT;
     const messages = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: activePrompt },
         ...history.slice(-MAX_HISTORY)
     ];
 
@@ -179,13 +182,13 @@ async function getHermesReply(chatId, userMessage) {
     }
 }
 
-async function generateAIReply(chatId, userMessage) {
+async function generateAIReply(chatId, userMessage, customSystemPrompt = null) {
     if (AI_PROVIDER === 'deepseek') {
-        return await getDeepSeekReply(chatId, userMessage);
+        return await getDeepSeekReply(chatId, userMessage, customSystemPrompt);
     } else if (AI_PROVIDER === 'gemini') {
-        return await getGeminiReply(chatId, userMessage);
+        return await getGeminiReply(chatId, userMessage, customSystemPrompt);
     } else {
-        return await getHermesReply(chatId, userMessage);
+        return await getHermesReply(chatId, userMessage, customSystemPrompt);
     }
 }
 
@@ -264,11 +267,12 @@ client.on('message', async (msg) => {
     const allowedLIDs = ['235429169213635@lid', '254975783530728@lid'];
     const allowedNumbers = ['9358706440', '8529911832', '919358706440', '918529911832'];
 
+    let contactNum = '';
     let isAllowed = allowedLIDs.includes(sender) || allowedNumbers.some(num => sender.includes(num));
     if (!isAllowed) {
         try {
             const contact = await msg.getContact();
-            const contactNum = (contact.number || '').replace(/[^\d]/g, '');
+            contactNum = (contact.number || '').replace(/[^\d]/g, '');
             if (allowedNumbers.some(num => contactNum.includes(num))) {
                 isAllowed = true;
             }
@@ -280,11 +284,57 @@ client.on('message', async (msg) => {
         return;
     }
 
-    console.log(`\n[INCOMING from Whitelisted ${sender}]: ${incomingText}`);
+    const isHimanshi = sender === '235429169213635@lid' || sender.includes('9358706440') || (contactNum && contactNum.includes('9358706440'));
+
+    let customPrompt = null;
+    if (isHimanshi) {
+        customPrompt = `You are Roshan (+91 8058363027) texting your close friend Himanshi (+91 9358706440) on WhatsApp.
+
+CRITICAL INSTRUCTIONS:
+1. YOU ARE ROSHAN HIMSELF. NEVER say you are an AI, bot, assistant, or Hermes. Never speak in 3rd person about Roshan.
+2. Tone & Style:
+   - Chat in natural, casual Hinglish (Hindi written in Roman English script, mixed casually with English words).
+   - Talk exactly like friends do on WhatsApp: informal, casual, teasing, friendly banter. Use informal pronouns like "tu", "tera", "tujhe", "bata", "kya chal raha hai", "sahi hai" (NEVER formal words like "aap").
+   - WhatsApp length: Keep replies short and natural (1 to 2 sentences max). Never write long paragraphs or bullet lists.
+   - Use emojis naturally if it fits (😅, 🤔, 😌, 😤, etc.).
+3. Context from your previous messages:
+   - Himanshi recently told you: "Par sahi hoja, agar koi jaada takleef hai to share, that's it".
+   - You exchanged "Good morning".
+   - Earlier today (Sept 23 evening), you sent her teasing videos and playful messages:
+     "Incase muh fula fula ke gaal ful gye ho toh"
+     "lekkin tu maaf mtt krna 🤔😅"
+     "Me bhi dekhta hu 😤 Mera time kab tkk leti"
+     "Mrne ka mnn kre toh mrr liyo 😌"
+   - Match this playful, teasing, caring dynamic.
+4. Reply directly to what she says in her incoming message.`;
+
+        // Pre-populate chat memory with recent context if not already present
+        if (!chatHistory.has(sender)) {
+            if (AI_PROVIDER === 'gemini') {
+                chatHistory.set(sender, [
+                    { role: 'user', parts: [{ text: 'Par sahi hoja. Agar koi jaada takleef hai to share, That\'s it' }] },
+                    { role: 'model', parts: [{ text: 'Sure Thank You. Bye bye' }] },
+                    { role: 'model', parts: [{ text: 'Good morning' }] },
+                    { role: 'user', parts: [{ text: 'Good morning' }] },
+                    { role: 'model', parts: [{ text: 'Incase muh fula fula ke gaal ful gye ho toh, lekkin tu maaf mtt krna 🤔😅 Me bhi dekhta hu 😤 Mera time kab tkk leti. Mrne ka mnn kre toh mrr liyo 😌' }] }
+                ]);
+            } else {
+                chatHistory.set(sender, [
+                    { role: 'user', content: 'Par sahi hoja. Agar koi jaada takleef hai to share, That\'s it' },
+                    { role: 'assistant', content: 'Sure Thank You. Bye bye' },
+                    { role: 'assistant', content: 'Good morning' },
+                    { role: 'user', content: 'Good morning' },
+                    { role: 'assistant', content: 'Incase muh fula fula ke gaal ful gye ho toh, lekkin tu maaf mtt krna 🤔😅 Me bhi dekhta hu 😤 Mera time kab tkk leti. Mrne ka mnn kre toh mrr liyo 😌' }
+                ]);
+            }
+        }
+    }
+
+    console.log(`\n[INCOMING from ${isHimanshi ? 'Himanshi Parihar' : sender}]: ${incomingText}`);
 
     try {
-        const reply = await generateAIReply(sender, incomingText);
-        console.log(`[REPLY to ${sender}]: ${reply}`);
+        const reply = await generateAIReply(sender, incomingText, customPrompt);
+        console.log(`[REPLY to ${isHimanshi ? 'Himanshi (as Roshan)' : sender}]: ${reply}`);
         await msg.reply(reply);
     } catch (err) {
         console.error('[REPLY ERROR]:', err);
