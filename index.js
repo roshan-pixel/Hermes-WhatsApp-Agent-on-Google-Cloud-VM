@@ -38,6 +38,35 @@ let currentQRDataUrl = null;
 let currentQRSVG = null;
 let clientStatus = 'STARTING';
 
+function getCurrentISTContext() {
+    const now = new Date();
+    const istOptions = { timeZone: 'Asia/Kolkata', hour12: true, hour: 'numeric', minute: 'numeric' };
+    const timeStr = now.toLocaleTimeString('en-US', istOptions);
+    const dateStr = now.toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+    const istHour = parseInt(now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false, hour: 'numeric' }), 10);
+    
+    let period = '';
+    let advice = '';
+    if (istHour >= 5 && istHour < 12) {
+        period = 'Morning';
+        advice = 'Morning hours: waking up, breakfast/nashta, starting day/college/office. Not night.';
+    } else if (istHour >= 12 && istHour < 17) {
+        period = 'Afternoon';
+        advice = 'Afternoon hours: lunch (khana khaya?), office work, daytime banter.';
+    } else if (istHour >= 17 && istHour < 20) {
+        period = 'Evening';
+        advice = 'Evening hours: evening tea/snacks, heading home, 6 PM curfew awareness.';
+    } else if (istHour >= 20 && istHour < 23) {
+        period = 'Night / Dinner time';
+        advice = 'Night time (Dinner / relaxing): dinner (khana khaya?), unwinding after office. It is NOT morning, and NOT late-night sleep time yet.';
+    } else {
+        period = 'Late Night';
+        advice = 'Late night / sleep hours (unwinding, sleepy, intimate talk or asking why she is awake late).';
+    }
+
+    return `\n[REAL-TIME CLOCK CONTEXT]: Current Time: ${dateStr}, ${timeStr} IST (${period}). ${advice}\n`;
+}
+
 async function getDeepSeekReply(chatId, userMessage, customSystemPrompt = null) {
     if (!DEEPSEEK_API_KEY) {
         return "I am online, but my DeepSeek API key is not configured.";
@@ -430,22 +459,16 @@ CRITICAL IDENTITY & BEHAVIORAL RULES:
 4. WHATSAPP FORMAT:
    - Length: 1 to 2 crisp, natural text sentences. Real mobile texting cadence, never long essays.
    - Pet Names: Use "cute people", "Hema", "Chote Don", or "Madam". NEVER use "meri jaan" or "babu".
-   - Emojis: 😂, 🤣, 🥺, 🫂, 😌, 🥹.`;
+   - Emojis: 😂, 🤣, 🥺, 🫂, 😌, 🥹.
 
-        // Pre-populate chat memory with warm, caring context
-        if (!chatHistory.has(sender)) {
-            if (AI_PROVIDER === 'gemini') {
-                chatHistory.set(sender, [
-                    { role: 'user', parts: [{ text: 'Good morning' }] },
-                    { role: 'model', parts: [{ text: 'Good morning cute people ☀️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }] }
-                ]);
-            } else {
-                chatHistory.set(sender, [
-                    { role: 'user', content: 'Good morning' },
-                    { role: 'assistant', content: 'Good morning cute people ☀️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }
-                ]);
-            }
-        }
+5. STRICT REAL-TIME TIME SENSE:
+   - Always strictly adhere to the [REAL-TIME CLOCK CONTEXT] attached to each message!
+   - Never confuse morning with night, afternoon, or evening.
+   - Morning (6 AM - 12 PM): waking up, breakfast/nashta, starting day/college.
+   - Afternoon (12 PM - 5 PM): lunch (khana khaya?), daytime banter, office work.
+   - Evening (5 PM - 8 PM): evening tea/snacks, 6 PM curfew awareness ("ghar pahuch gayi?").
+   - Night / Dinner (8 PM - 10:30 PM): dinner time ("khana khaya?"), relaxing after office. It is NOT morning, and NOT late-night sleep time yet!
+   - Late night (>10:30 PM): sleep time, asking why she is still awake late.`;
 
         // Debounce consecutive rapid messages from Himanshi (wait 3.5s of silence)
         if (!pendingBuffers.has(sender)) {
@@ -475,7 +498,8 @@ CRITICAL IDENTITY & BEHAVIORAL RULES:
                 if (recalledMemory) {
                     console.log(`[GRAPHIFY MEMORY RECALLED]:\n${recalledMemory.trim()}`);
                 }
-                const activePrompt = recalledMemory ? `${customPrompt}\n${recalledMemory}` : customPrompt;
+                const timeContext = getCurrentISTContext();
+                const activePrompt = `${customPrompt}\n${timeContext}${recalledMemory ? '\n' + recalledMemory : ''}`;
 
                 const reply = await generateAIReply(sender, combinedText, activePrompt);
                 console.log(`[REPLY to Himanshi (Lallu Lal @ Roshan)]: ${reply}`);
@@ -904,4 +928,7 @@ server.listen(3000, '0.0.0.0', () => {
     console.log('[HTTP] QR & API Server running on http://0.0.0.0:3000');
 });
 
-client.initialize();
+client.initialize().catch(err => {
+    console.error('[CLIENT INITIALIZE FATAL ERROR]:', err.message);
+    process.exit(1);
+});
