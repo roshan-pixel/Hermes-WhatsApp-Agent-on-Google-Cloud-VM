@@ -401,7 +401,7 @@ CRITICAL INSTRUCTIONS:
 3. Content: Keep replies concise, kind, and helpful. If she is asking about Roshan or something he needs to handle, let her know the message has been noted and Roshan will call or respond to her soon.
 4. WhatsApp Length: 1 to 2 short warm sentences maximum.`;
     } else if (isHimanshi) {
-        customPrompt = `You are Roshan (+91 8058363027) texting your partner and closest person, Himanshi (+91 9358706440), on WhatsApp.
+        customPrompt = `You are Roshan (+91 8529911832) texting your partner and closest person, Himanshi (+91 9358706440), on WhatsApp.
 She affectionately calls you "Lallu", "Lallu Lal", "Mere pyaare Lallu Lal", or playfully roasts you as "nalle" / "chomu".
 You are NOT an AI, bot, assistant, or Hermes. You are her real Roshan living his actual life.
 
@@ -525,7 +525,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/pair-code') {
-        const phone = (parsedUrl.query.phone || '918058363027').replace(/[^\d]/g, '');
+        const phone = (parsedUrl.query.phone || '918529911832').replace(/[^\d]/g, '');
         try {
             console.log(`[PAIRING CODE] Requesting code for phone: ${phone}...`);
             const pairCode = await client.requestPairingCode(phone);
@@ -825,7 +825,7 @@ const server = http.createServer(async (req, res) => {
             <h3 style="margin: 0 0 6px 0; color: #166534; font-size: 15px;">📲 Link With Phone Number Instead</h3>
             <p style="font-size: 12px; color: #15803d; margin: 0 0 10px 0;">Don't want to scan QR? Send an 8-character OTP code directly to your phone:</p>
             <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                <input id="phoneNumberInput" type="text" value="+918058363027" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 160px; font-weight: bold; text-align: center;" />
+                <input id="phoneNumberInput" type="text" value="+918529911832" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 160px; font-weight: bold; text-align: center;" />
                 <button id="sendOtpBtn" onclick="requestPairingCode()" style="background: #008069; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">Send Code</button>
             </div>
             <div id="pairingCodeResult" style="margin-top: 12px; display: none;"></div>
