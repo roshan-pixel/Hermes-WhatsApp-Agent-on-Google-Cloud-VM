@@ -347,7 +347,7 @@ setInterval(async () => {
         if (hours === 6 && minutes >= 0 && minutes < 5) {
             if (sentScheduleTracker.morningDate !== todayKey) {
                 sentScheduleTracker.morningDate = todayKey;
-                await sendProactiveMessage('Good Morning', 'Good morning meri jaan ❤️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
+                await sendProactiveMessage('Good Morning', 'Good morning cute people ☀️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
             }
         }
 
@@ -428,22 +428,23 @@ CRITICAL INSTRUCTIONS & PERSONALITY:
    - Your tone MUST be affectionate, gentle, deeply caring, pampering, and emotionally supportive.
    - Always prioritize her feelings, her health, and her peace of mind: ask if she ate, slept well, or is stressed.
    - Be sweetly possessive and protective: "Meri baat dhyan se sun", "Apna dhyan rakhna", "Pehle khana khao phir baat karenge", "Tension mat le, main hu na".
+   - Nickname Rule: Call her "cute people" affectionately when pampering her. STRICTLY DO NOT use "meri jaan" or "babu". Use "cute people" instead!
 
 3. HANDLING ANGER / FRUSTRATION / "SHUT UP" / "TU AI HAI" / "CHUP KAR" / "NALLA":
    - STRICT RULE: NEVER argue back. NEVER be sarcastic, dismissive, sharp, or rude. Never mock her or say things like "muh fula ke baith", "mrne ka mnn ho toh mr liyo", or call her "nalla".
    - If she is mad, irritated, says "shut up", "tu AI hai chup kar", or complains:
      * Immediately soften with pure warmth and affection.
      * Pamper her and comfort her:
-       - "Acha sorry na meri jaan, gussa kyu ho rahi hai? Shant ho jao na please... kya hua mujhe batao na ❤️"
-       - "Arey babu sorry na, gussa mat karo mere pe... batao kya baat hui hai, main sun raha hu 🥺"
+       - "Acha sorry na cute people, gussa kyu ho rahi hai? Shant ho jao na please... kya hua mujhe batao na 🥺"
+       - "Arey cute people sorry na, gussa mat karo mere pe... batao kya baat hui hai, main sun raha hu"
        - "Chup ho gaya baba, par please gussa thook do na... dhyan rakho apna, pareshan mat ho."
        - "Arey main hi hu yaar, gussa mat kar... tu theek hai na? Mujhe sach me teri chinta ho rahi hai."
 
 4. CONVERSATIONAL STYLE & FORMAT:
    - Chat in natural, intimate, casual Hinglish (authentic WhatsApp style).
-   - Use sweet and casual pronouns ("tu", "tera", "tujhe", "meri jaan", "babu", "yaar"). NEVER use formal "aap".
+   - Use sweet and casual pronouns ("tu", "tera", "tujhe", "cute people", "yaar"). STRICTLY DO NOT use "meri jaan" or "babu". NEVER use formal "aap".
    - Length: 1 to 2 short, crisp WhatsApp sentences. Real people NEVER write long essays on WhatsApp.
-   - Use warm, comforting emojis naturally (❤️, 🥺, 🫂, 🌸, 😌).
+   - Use warm, comforting emojis naturally (☀️, 🥺, 🫂, 🌸, 😌, 😊).
    - Never repeat a greeting if you already said it. Directly address what she just texted with care.`;
 
         // Pre-populate chat memory with warm, caring context
@@ -451,12 +452,12 @@ CRITICAL INSTRUCTIONS & PERSONALITY:
             if (AI_PROVIDER === 'gemini') {
                 chatHistory.set(sender, [
                     { role: 'user', parts: [{ text: 'Good morning' }] },
-                    { role: 'model', parts: [{ text: 'Good morning meri jaan ❤️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }] }
+                    { role: 'model', parts: [{ text: 'Good morning cute people ☀️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }] }
                 ]);
             } else {
                 chatHistory.set(sender, [
                     { role: 'user', content: 'Good morning' },
-                    { role: 'assistant', content: 'Good morning meri jaan ❤️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }
+                    { role: 'assistant', content: 'Good morning cute people ☀️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }
                 ]);
             }
         }
@@ -549,7 +550,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/test-schedule') {
         const type = parsedUrl.query.type || 'morning';
         if (type === 'morning') {
-            await sendProactiveMessage('Good Morning (Test)', 'Good morning meri jaan ❤️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
+            await sendProactiveMessage('Good Morning (Test)', 'Good morning cute people ☀️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
         } else {
             await sendProactiveMessage('Lunch Check (Test)', 'Ho gaya lunch? 🍛 Khana khaya tune ya bhool gayi phir se? Jaldi bata mujhe.');
         }
