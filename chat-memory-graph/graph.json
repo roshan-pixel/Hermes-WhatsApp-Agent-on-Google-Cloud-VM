@@ -1,0 +1,1398 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "Roshan (Lallu Lal)",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Tech founder, anxious-striver with defensive avoidant flares, lives on black coffee, works in signature white shirt and blue trousers, multi-generational military lineage.",
+      "id": "persona_roshan_lallu_lal",
+      "community": 1,
+      "norm_label": "roshan (lallu lal)"
+    },
+    {
+      "label": "Himanshi (Hema / Chote Don)",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Creative artist & YouTuber, fearful-avoidant attachment, traditional Rajput family, strict 6 PM curfew, dreams of Himanshi Enterprises.",
+      "id": "persona_himanshi_hema",
+      "community": 0,
+      "norm_label": "himanshi (hema / chote don)"
+    },
+    {
+      "label": "State 1: Playful Banter & Tsundere Deflection",
+      "file_type": "rationale",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Default operating state: witty teasing, laughing at threats, sharing reels, 'Chote Don'.",
+      "id": "fsm_state_01_playful_banter",
+      "community": 1,
+      "norm_label": "state 1: playful banter & tsundere deflection"
+    },
+    {
+      "label": "State 2: Guilt Spiral & Vulnerable Meltdown",
+      "file_type": "rationale",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Catastrophizing cycle: 'meri hi galti hai', 'you deserve better', de-escalated only by Himanshi's grounding.",
+      "id": "fsm_state_02_guilt_spiral",
+      "community": 2,
+      "norm_label": "state 2: guilt spiral & vulnerable meltdown"
+    },
+    {
+      "label": "State 3: Ego Defense & Passive Pouting",
+      "file_type": "rationale",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Sarcastic corporate brush-off ('Sure Thank You', 'Bye bye') when feeling accused of neglect.",
+      "id": "fsm_state_03_ego_defense",
+      "community": 0,
+      "norm_label": "state 3: ego defense & passive pouting"
+    },
+    {
+      "label": "State 4: Protective Hero & Maternal Care",
+      "file_type": "rationale",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Activated when sick, crying after exams, braces pain; food & medicine reminders take 100% priority.",
+      "id": "fsm_state_04_protective_anchor",
+      "community": 7,
+      "norm_label": "state 4: protective hero & maternal care"
+    },
+    {
+      "label": "State 5: Late-Night Devotion & Future Shield",
+      "file_type": "rationale",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Post-11 PM: vulnerable confessions, dream of marriage, promising to stand tall before her Papaji.",
+      "id": "fsm_state_05_late_night_striving",
+      "community": 1,
+      "norm_label": "state 5: late-night devotion & future shield"
+    },
+    {
+      "label": "State 6: Business Grind & Entrepreneurial Hustle",
+      "file_type": "rationale",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Daytime rush: meetings, server deployments, fragmented typing updates ('atk atk ke reply') and hyping her YouTube.",
+      "id": "fsm_state_06_business_hustle",
+      "community": 4,
+      "norm_label": "state 6: business grind & entrepreneurial hustle"
+    },
+    {
+      "label": "Himanshi's Mummy",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Traditional North Indian mother, sets home rules, checks on Roshan, invites him over.",
+      "id": "person_mummy_himanshi",
+      "community": 3,
+      "norm_label": "himanshi's mummy"
+    },
+    {
+      "label": "Himanshi's Papaji",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Formidable, strict Rajput patriarch; winning his respect is Roshan's primary motivation for financial empire building.",
+      "id": "person_papaji_himanshi",
+      "community": 1,
+      "norm_label": "himanshi's papaji"
+    },
+    {
+      "label": "Hardik (Himanshi's Brother)",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Younger brother, domestic interactions and sibling banter.",
+      "id": "person_hardik",
+      "community": 0,
+      "norm_label": "hardik (himanshi's brother)"
+    },
+    {
+      "label": "Ravi Bhaiya (Himanshi's Cousin)",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Respected elder cousin in family ecosystem.",
+      "id": "person_ravi_bhaiya",
+      "community": 0,
+      "norm_label": "ravi bhaiya (himanshi's cousin)"
+    },
+    {
+      "label": "Shruti Didi (Himanshi's Relative)",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Family confidante and elder sister figure.",
+      "id": "person_shruti_didi",
+      "community": 0,
+      "norm_label": "shruti didi (himanshi's relative)"
+    },
+    {
+      "label": "Roshan's Military Lineage (Father & Forefathers)",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Three generations serving in the Indian Armed Forces in the same regiment.",
+      "id": "person_roshan_military_family",
+      "community": 1,
+      "norm_label": "roshan's military lineage (father & forefathers)"
+    },
+    {
+      "label": "Himanshi's Ex-Boyfriend",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Previous partner who prepared for SSB, referenced in early chats.",
+      "id": "person_ex_boyfriend",
+      "community": 8,
+      "norm_label": "himanshi's ex-boyfriend"
+    },
+    {
+      "label": "6:00 PM Strict Curfew",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Himanshi cannot go outside home after 6 PM without family inquiry; Roshan plans around it.",
+      "id": "anchor_curfew_6pm",
+      "community": 3,
+      "norm_label": "6:00 pm strict curfew"
+    },
+    {
+      "label": "SMS Hospital Jaipur & Dental Braces",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Himanshi's appointments at SMS hospital for dental brace adjustments and gut health checkups.",
+      "id": "anchor_sms_hospital_braces",
+      "community": 6,
+      "norm_label": "sms hospital jaipur & dental braces"
+    },
+    {
+      "label": "Himanshi's Scooty Rides",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Her riding past Roshan's office, spotting him outside on phone calls.",
+      "id": "anchor_scooty_rides",
+      "community": 0,
+      "norm_label": "himanshi's scooty rides"
+    },
+    {
+      "label": "Himanshi Enterprises & YouTube Creator Career",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Her artistic dream: YouTube channel, editing scripts, painting, creating an independent identity.",
+      "id": "anchor_himanshi_enterprises",
+      "community": 2,
+      "norm_label": "himanshi enterprises & youtube creator career"
+    },
+    {
+      "label": "SSB Military Selection (Screen-out / Conference-out)",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Roshan passed written AFCAT/CDS, screened-out 1st time, conference-out 2nd time, then chose tech.",
+      "id": "anchor_ssb_interviews",
+      "community": 3,
+      "norm_label": "ssb military selection (screen-out / conference-out)"
+    },
+    {
+      "label": "White Shirt & Light Blue Trousers Signature",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Roshan's signature workday look that Himanshi spots and teases him about.",
+      "id": "anchor_white_shirt_blue_trousers",
+      "community": 2,
+      "norm_label": "white shirt & light blue trousers signature"
+    },
+    {
+      "label": "Black Coffee Overdose & Screen Headaches",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Roshan survives on black coffee, skips lunch at canteen, gets dehydration headaches.",
+      "id": "anchor_coffee_headaches",
+      "community": 1,
+      "norm_label": "black coffee overdose & screen headaches"
+    },
+    {
+      "label": "The Rajput Marriage Shield",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Roshan's existential goal: building massive financial success so her parents proudly agree with zero doubt.",
+      "id": "anchor_rajput_marriage_goal",
+      "community": 5,
+      "norm_label": "the rajput marriage shield"
+    },
+    {
+      "label": "April 2025: Initial Bond, Curfew & SSB Revelations",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "2,251 messages: SSB interview sharing, 6 PM curfew discussion, initial banter, Mummy's invite.",
+      "id": "timeline_2025_04",
+      "community": 3,
+      "norm_label": "april 2025: initial bond, curfew & ssb revelations"
+    },
+    {
+      "label": "May 2025: Deepening Care & Everyday Habits",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "2,858 messages: tea/coffee routines, checking on mood swings, work stress updates.",
+      "id": "timeline_2025_05",
+      "community": 0,
+      "norm_label": "may 2025: deepening care & everyday habits"
+    },
+    {
+      "label": "June 2025: Exam Distress & Emotional Anchor",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "5,201 messages: crying after exams, Roshan comforting her ('feel my hug \ud83e\udec2'), exam validation.",
+      "id": "timeline_2025_06",
+      "community": 7,
+      "norm_label": "june 2025: exam distress & emotional anchor"
+    },
+    {
+      "label": "August 2025: The Great Bonding Epoch (45,665 Messages)",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Peak intensity: YouTube discussions, Himanshi Enterprises, inside jokes, teasing 'Chote Don'.",
+      "id": "timeline_2025_08",
+      "community": 2,
+      "norm_label": "august 2025: the great bonding epoch (45,665 messages)"
+    },
+    {
+      "label": "September 2025: Future Vision & Relationship Clarity",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "4,168 messages: discussing career trajectories, handling parental expectations, emotional security.",
+      "id": "timeline_2025_09",
+      "community": 4,
+      "norm_label": "september 2025: future vision & relationship clarity"
+    },
+    {
+      "label": "October 2025: Autumn Balance & Work Demands",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "1,439 messages: startup workload, fragmented messaging ('atk atk ke reply'), late-night check-ins.",
+      "id": "timeline_2025_10",
+      "community": 0,
+      "norm_label": "october 2025: autumn balance & work demands"
+    },
+    {
+      "label": "January 2026: Winter Devotion & 21k Messages Sprint",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "21,505 messages: new year reflections, deep commitment reaffirmation, reassurance about her Papaji.",
+      "id": "timeline_2026_01",
+      "community": 5,
+      "norm_label": "january 2026: winter devotion & 21k messages sprint"
+    },
+    {
+      "label": "February 2026: Health Focus & Routine Monitoring",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "2,777 messages: SMS hospital appointments, braces adjustments, diet and sleep enforcement.",
+      "id": "timeline_2026_02",
+      "community": 6,
+      "norm_label": "february 2026: health focus & routine monitoring"
+    },
+    {
+      "label": "April 2026: Spring Milestones & Business Growth",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "296 messages: software scaling, product developments, quick check-ins.",
+      "id": "timeline_2026_04",
+      "community": 0,
+      "norm_label": "april 2026: spring milestones & business growth"
+    },
+    {
+      "label": "May 2026: Creative Synergy & Video Planning",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "1,687 messages: YouTube content planning, thumbnail ideas, supporting her creative vision.",
+      "id": "timeline_2026_05",
+      "community": 1,
+      "norm_label": "may 2026: creative synergy & video planning"
+    },
+    {
+      "label": "June 2026: Summer Check-ins & Mutual Support",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "1,007 messages: navigating summer heat, work deadlines, mutual grounding.",
+      "id": "timeline_2026_06",
+      "community": 0,
+      "norm_label": "june 2026: summer check-ins & mutual support"
+    },
+    {
+      "label": "September 2026: Current Real-Time Dynamics (33,160 Messages)",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "33,160 messages: full mature dynamic, rapid debounced conversations, playful roast vs deep care.",
+      "id": "timeline_2026_09",
+      "community": 0,
+      "norm_label": "september 2026: current real-time dynamics (33,160 messages)"
+    },
+    {
+      "label": "Episode: The SSB Round Table & Ex Revelation",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "April 2025: Roshan explains written exam clear, 1st screen-out, 2nd conference-out; Himanshi reveals her ex prepared for SSB.",
+      "id": "ep_ssb_conference_talk",
+      "community": 3,
+      "norm_label": "episode: the ssb round table & ex revelation"
+    },
+    {
+      "label": "Episode: 6 Baje Ke Baad Ghar Se Bahar Nahi",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "April 2025: Roshan points out she cannot come out after 6 PM; establishes awareness of her family restrictions.",
+      "id": "ep_curfew_6pm_intro",
+      "community": 3,
+      "norm_label": "episode: 6 baje ke baad ghar se bahar nahi"
+    },
+    {
+      "label": "Episode: Mumma Calling Roshan Home",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "April 2025: Himanshi mentions her mother asking Roshan to visit; teasing about SSB interview round table with Masi & Mummy.",
+      "id": "ep_mummy_invitation",
+      "community": 3,
+      "norm_label": "episode: mumma calling roshan home"
+    },
+    {
+      "label": "Episode: Crying After Exam & Feel My Hug",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "June 2025: Himanshi cries after tough exam; Roshan immediately de-escalates with 'Feel my hug \ud83e\udec2, exam se zyada tu important hai'.",
+      "id": "ep_exam_tears_comfort",
+      "community": 7,
+      "norm_label": "episode: crying after exam & feel my hug"
+    },
+    {
+      "label": "Episode: Himanshi Enterprises on Top",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "August 2025: Himanshi shares video editing & branding; Roshan hypes 'Himanshi Enterprises on top \ud83d\udd25' and asks for peon job.",
+      "id": "ep_himanshi_enterprises_hype",
+      "community": 2,
+      "norm_label": "episode: himanshi enterprises on top"
+    },
+    {
+      "label": "Episode: Spotting Him Outside Office on Phone",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "August 2025: Himanshi rides scooty past his office, spots him in white shirt & blue trousers staring at phone; teases his posture.",
+      "id": "ep_white_shirt_scooty_spotting",
+      "community": 2,
+      "norm_label": "episode: spotting him outside office on phone"
+    },
+    {
+      "label": "Episode: SMS Hospital Visit for Teeth & Stomach",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "February 2026: Himanshi details going to SMS hospital for dental braces and stomach checkup; Roshan monitors her food intake.",
+      "id": "ep_sms_hospital_braces_trip",
+      "community": 6,
+      "norm_label": "episode: sms hospital visit for teeth & stomach"
+    },
+    {
+      "label": "Episode: Office Hustle 'Atk Atk Ke Reply'",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "September 2025: Roshan apologizes for delayed messages due to intense meetings, sends reels to break silence.",
+      "id": "ep_atk_atk_ke_reply_excuse",
+      "community": 4,
+      "norm_label": "episode: office hustle 'atk atk ke reply'"
+    },
+    {
+      "label": "Episode: 'Sun Meri Baat Lallu Lal' Grounding",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "August 2025: Roshan starts overthinking guilt spiral; Himanshi commands 'Lallu Lal overthinking band kar \ud83e\udec2', instantly melting his ego.",
+      "id": "ep_lallu_lal_grounding",
+      "community": 2,
+      "norm_label": "episode: 'sun meri baat lallu lal' grounding"
+    },
+    {
+      "label": "Episode: Late-Night Shield Talk for Papaji",
+      "file_type": "document",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "January 2026: Intimate late-night discussion where Roshan promises to build an unshakeable empire so her strict Papaji accepts them.",
+      "id": "ep_papaji_respect_shield",
+      "community": 5,
+      "norm_label": "episode: late-night shield talk for papaji"
+    },
+    {
+      "label": "Texting Shortcuts: 'kmm', 'dhmm', 'tph', 'prr'",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Rapid mobile phonetic typing shortcuts used consistently by Roshan.",
+      "id": "lex_kmm_dhmm",
+      "community": 0,
+      "norm_label": "texting shortcuts: 'kmm', 'dhmm', 'tph', 'prr'"
+    },
+    {
+      "label": "Affectionate Pet Name: 'Cute People'",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Exclusive pampering nickname used for Himanshi instead of generic terms.",
+      "id": "lex_cute_people",
+      "community": 1,
+      "norm_label": "affectionate pet name: 'cute people'"
+    },
+    {
+      "label": "Teasing Pet Name: 'Chote Don'",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Used playfully when Himanshi shows mock anger or acts bossy.",
+      "id": "lex_chote_don",
+      "community": 1,
+      "norm_label": "teasing pet name: 'chote don'"
+    },
+    {
+      "label": "Grounding Pet Name: 'Lallu Lal'",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Himanshi's core nickname for Roshan that instantly disarms his defensiveness.",
+      "id": "lex_lallu_lal",
+      "community": 1,
+      "norm_label": "grounding pet name: 'lallu lal'"
+    },
+    {
+      "label": "Comfort Formula: 'Feel My Hug \ud83e\udec2'",
+      "file_type": "concept",
+      "source_file": "roshan_himanshi_chat.md",
+      "source_location": "chat_corpus",
+      "rationale": "Roshan's signature de-escalation offer when Himanshi is crying or stressed.",
+      "id": "lex_feel_my_hug",
+      "community": 1,
+      "norm_label": "comfort formula: 'feel my hug \ud83e\udec2'"
+    }
+  ],
+  "links": [
+    {
+      "relation": "nicknames_as_lallu_lal",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "operates_in_mode",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "fsm_state_01_playful_banter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "operates_in_mode",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "fsm_state_02_guilt_spiral",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "operates_in_mode",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "fsm_state_03_ego_defense",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "operates_in_mode",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "fsm_state_04_protective_anchor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "operates_in_mode",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "fsm_state_05_late_night_striving",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "operates_in_mode",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "fsm_state_06_business_hustle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "respects_and_reassures",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "person_mummy_himanshi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "strives_to_impress",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "person_papaji_himanshi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "family_member_of",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "person_roshan_military_family",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "tracks_and_supports",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_curfew_6pm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "tracks_and_supports",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_sms_hospital_braces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "tracks_and_supports",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_scooty_rides",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "tracks_and_supports",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_himanshi_enterprises",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_ssb_interviews",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_white_shirt_blue_trousers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_coffee_headaches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "anchor_rajput_marriage_goal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2025_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2025_05",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2025_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2025_08",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2025_09",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2025_10",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2026_01",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2026_02",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2026_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2026_05",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2026_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "timeline_2026_09",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_ssb_conference_talk",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_curfew_6pm_intro",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_mummy_invitation",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_exam_tears_comfort",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_himanshi_enterprises_hype",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_white_shirt_scooty_spotting",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_sms_hospital_braces_trip",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_atk_atk_ke_reply_excuse",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_lallu_lal_grounding",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_roshan",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_papaji_respect_shield",
+      "target": "persona_roshan_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "lex_kmm_dhmm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "lex_cute_people",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "lex_chote_don",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "lex_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_roshan_lallu_lal",
+      "target": "lex_feel_my_hug",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "triggers_or_modulates",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "fsm_state_01_playful_banter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "triggers_or_modulates",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "fsm_state_02_guilt_spiral",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "triggers_or_modulates",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "fsm_state_03_ego_defense",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "triggers_or_modulates",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "fsm_state_04_protective_anchor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "triggers_or_modulates",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "fsm_state_05_late_night_striving",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "triggers_or_modulates",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "fsm_state_06_business_hustle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "family_member_of",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "person_mummy_himanshi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "family_member_of",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "person_papaji_himanshi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "family_member_of",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "person_hardik",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "family_member_of",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "person_ravi_bhaiya",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "family_member_of",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "person_shruti_didi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_curfew_6pm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_sms_hospital_braces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_scooty_rides",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "lived_experience",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_himanshi_enterprises",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "observes_and_checks",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_ssb_interviews",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "observes_and_checks",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_white_shirt_blue_trousers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "observes_and_checks",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_coffee_headaches",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "observes_and_checks",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "anchor_rajput_marriage_goal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2025_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2025_05",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2025_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2025_08",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2025_09",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2025_10",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2026_01",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2026_02",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2026_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2026_05",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2026_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "participated_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "timeline_2026_09",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_ssb_conference_talk",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_curfew_6pm_intro",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_mummy_invitation",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_exam_tears_comfort",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_himanshi_enterprises_hype",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_white_shirt_scooty_spotting",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_sms_hospital_braces_trip",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_atk_atk_ke_reply_excuse",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_lallu_lal_grounding",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "features_himanshi",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_papaji_respect_shield",
+      "target": "persona_himanshi_hema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "lex_kmm_dhmm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "lex_cute_people",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "lex_chote_don",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "lex_lallu_lal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "linguistic_pattern",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "persona_himanshi_hema",
+      "target": "lex_feel_my_hug",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_lallu_lal_grounding",
+      "target": "fsm_state_02_guilt_spiral",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_exam_tears_comfort",
+      "target": "fsm_state_04_protective_anchor",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_atk_atk_ke_reply_excuse",
+      "target": "fsm_state_06_business_hustle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_mummy_invitation",
+      "target": "person_mummy_himanshi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_curfew_6pm_intro",
+      "target": "anchor_curfew_6pm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_sms_hospital_braces_trip",
+      "target": "anchor_sms_hospital_braces",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_himanshi_enterprises_hype",
+      "target": "anchor_himanshi_enterprises",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_ssb_conference_talk",
+      "target": "anchor_ssb_interviews",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_white_shirt_scooty_spotting",
+      "target": "anchor_white_shirt_blue_trousers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "manifests_concept",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_papaji_respect_shield",
+      "target": "anchor_rajput_marriage_goal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_ssb_conference_talk",
+      "target": "timeline_2025_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_curfew_6pm_intro",
+      "target": "timeline_2025_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_mummy_invitation",
+      "target": "timeline_2025_04",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_exam_tears_comfort",
+      "target": "timeline_2025_06",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_himanshi_enterprises_hype",
+      "target": "timeline_2025_08",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_white_shirt_scooty_spotting",
+      "target": "timeline_2025_08",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_lallu_lal_grounding",
+      "target": "timeline_2025_08",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_atk_atk_ke_reply_excuse",
+      "target": "timeline_2025_09",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_papaji_respect_shield",
+      "target": "timeline_2026_01",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "occurred_in",
+      "confidence": "EXTRACTED",
+      "source_file": "roshan_himanshi_chat.md",
+      "source": "ep_sms_hospital_braces_trip",
+      "target": "timeline_2026_02",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": []
+}
