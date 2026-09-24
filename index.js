@@ -309,84 +309,9 @@ client.on('disconnected', (reason) => {
     console.warn('[DISCONNECTED] Client was disconnected:', reason);
 });
 
-// ─── AUTOMATED PROACTIVE SCHEDULES (6:00 AM IST & 3:00 PM IST) ───
-// Only send automated morning/lunch messages to Himanshi (9358706440)
-const HIMANSHI_TARGETS = ['235429169213635@lid', '919358706440@c.us'];
-let sentScheduleTracker = {
-    morningDate: '',
-    lunchDate: ''
-};
-
-async function sendProactiveMessage(type, messageText) {
-    if (clientStatus !== 'CONNECTED') {
-        console.log(`[SCHEDULED ${type}]: Client not connected yet, skipping.`);
-        return;
-    }
-
-    let targetChat = null;
-    let targetId = '235429169213635@lid'; // Himanshi Parihar LID
-    try {
-        const chats = await client.getChats().catch(() => []);
-        targetChat = chats.find(c => {
-            const cid = c.id?._serialized || c.id || '';
-            const cname = (c.name || '').toLowerCase();
-            return (HIMANSHI_TARGETS.includes(cid) || cname.includes('himanshi') || cid.includes('9358706440')) &&
-                   !cid.includes('9549477444') && cid !== '237413007929354@lid' && !cname.includes('dilip');
-        });
-        if (targetChat) {
-            targetId = targetChat.id?._serialized || targetChat.id;
-        }
-    } catch (err) {
-        console.error('[SCHEDULED FIND CHAT ERROR]:', err.message);
-    }
-
-    try {
-        console.log(`[SCHEDULED ${type}] Dispatching to ${targetId}: "${messageText}"`);
-        if (targetChat && targetChat.sendStateTyping) {
-            await targetChat.sendStateTyping().catch(() => {});
-            await new Promise(r => setTimeout(r, 2000));
-        }
-        await client.sendMessage(targetId, messageText);
-        if (targetChat && targetChat.clearState) {
-            await targetChat.clearState().catch(() => {});
-        }
-        console.log(`[SCHEDULED ${type}] Successfully sent to Himanshi!`);
-
-        const hist = chatHistory.get(targetId) || [];
-        hist.push({ role: 'assistant', content: messageText });
-        chatHistory.set(targetId, hist.slice(-MAX_HISTORY));
-    } catch (err) {
-        console.error(`[SCHEDULED ${type} SEND ERROR]:`, err.message);
-    }
-}
-
-// Check every 30 seconds for 6:00 AM IST and 3:00 PM IST
-setInterval(async () => {
-    try {
-        const istDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-        const hours = istDate.getHours();
-        const minutes = istDate.getMinutes();
-        const todayKey = `${istDate.getFullYear()}-${String(istDate.getMonth() + 1).padStart(2, '0')}-${String(istDate.getDate()).padStart(2, '0')}`;
-
-        // 6:00 AM IST (window 06:00 - 06:05)
-        if (hours === 6 && minutes >= 0 && minutes < 5) {
-            if (sentScheduleTracker.morningDate !== todayKey) {
-                sentScheduleTracker.morningDate = todayKey;
-                await sendProactiveMessage('Good Morning', 'Good morning cute people ☀️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
-            }
-        }
-
-        // 3:00 PM IST (15:00 - 15:05)
-        if (hours === 15 && minutes >= 0 && minutes < 5) {
-            if (sentScheduleTracker.lunchDate !== todayKey) {
-                sentScheduleTracker.lunchDate = todayKey;
-                await sendProactiveMessage('Lunch Check', 'Ho gaya lunch? 🍛 Khana khaya tune ya bhool gayi phir se? Jaldi bata mujhe.');
-            }
-        }
-    } catch (e) {
-        console.error('[SCHEDULER LOOP ERROR]:', e.message);
-    }
-}, 30000);
+// ─── PROACTIVE SCHEDULER: DISABLED ───
+// All automated/scheduled proactive messages (6:00 AM morning & 3:00 PM lunch) have been completely removed.
+// The bot now operates strictly in reactive mode: it ONLY replies when messages are received.
 
 const pendingBuffers = new Map(); // sender -> { timeout, texts: [], lastMsg }
 
@@ -604,16 +529,6 @@ const server = http.createServer(async (req, res) => {
         }
     }
 
-    if (pathname === '/test-schedule') {
-        const type = parsedUrl.query.type || 'morning';
-        if (type === 'morning') {
-            await sendProactiveMessage('Good Morning (Test)', 'Good morning cute people ☀️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
-        } else {
-            await sendProactiveMessage('Lunch Check (Test)', 'Ho gaya lunch? 🍛 Khana khaya tune ya bhool gayi phir se? Jaldi bata mujhe.');
-        }
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: true, tested: type }));
-    }
 
     if (pathname === '/status') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
