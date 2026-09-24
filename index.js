@@ -197,12 +197,17 @@ console.log(`Starting ${BOT_NAME} on WhatsApp Web (Multi-Device)...`);
 console.log(`Active Brain: ${AI_PROVIDER.toUpperCase()} (${AI_PROVIDER === 'deepseek' ? DEEPSEEK_MODEL : (AI_PROVIDER === 'gemini' ? GEMINI_MODEL : HERMES_MODEL)})`);
 console.log('--------------------------------------------------');
 
+const CHROME_PATH = process.env.PUPPETEER_EXECUTABLE_PATH || 
+    (fs.existsSync('/usr/local/bin/google-chrome-stable') ? '/usr/local/bin/google-chrome-stable' :
+    (fs.existsSync('/home/sgarm/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome') ? '/home/sgarm/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome' : undefined));
+
 const client = new Client({
     authStrategy: new LocalAuth({ dataPath: './.wwebjs_auth' }),
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
     puppeteer: {
         headless: true,
         protocolTimeout: 180000,
+        executablePath: CHROME_PATH,
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -210,12 +215,13 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--disable-gpu'
+            '--disable-gpu',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'
         ]
     }
 });
-
-client.options.puppeteer.executablePath = undefined;
 
 client.on('qr', async (qr) => {
     clientStatus = 'QR_READY';
@@ -244,28 +250,26 @@ client.on('ready', async () => {
     } catch(e) {}
 });
 
-// Broadcast ONLINE presence status to WhatsApp servers continuously (every 12 seconds)
+// Health check watchdog: automatically detect if WhatsApp Web reloaded/detached and cleanly restart PM2
 setInterval(async () => {
     try {
-        if (clientStatus === 'CONNECTED' && client.sendPresenceAvailable) {
+        if (clientStatus === 'CONNECTED') {
             const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
             const activePage = pages.find(p => !p.isClosed() && p.url().includes('whatsapp.com'));
-            if (activePage && client.pupPage !== activePage) {
+            if (!activePage || activePage.isClosed()) {
+                throw new Error('No active WhatsApp page found');
+            }
+            if (client.pupPage !== activePage) {
                 client.pupPage = activePage;
             }
-            if (client.pupPage && !client.pupPage.isClosed()) {
-                await client.pupPage.evaluate(() => {
-                    window.dispatchEvent(new Event('focus'));
-                    document.dispatchEvent(new Event('visibilitychange'));
-                }).catch(() => {});
-            }
-            await client.sendPresenceAvailable();
-            console.log(`[PRESENCE HEARTBEAT] Broadcasted ONLINE at ${new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}`);
+            await activePage.evaluate(() => document.title);
         }
-    } catch(e) {
-        console.error('[PRESENCE HEARTBEAT ERROR]:', e.message);
+    } catch(err) {
+        console.error('[WATCHDOG]: Detached frame or session issue detected:', err.message);
+        console.log('[WATCHDOG] Triggering clean restart to reconnect fresh session...');
+        process.exit(1);
     }
-}, 12000);
+}, 30000);
 
 client.on('authenticated', () => {
     clientStatus = 'AUTHENTICATED';
@@ -281,6 +285,85 @@ client.on('disconnected', (reason) => {
     clientStatus = 'DISCONNECTED';
     console.warn('[DISCONNECTED] Client was disconnected:', reason);
 });
+
+// ─── AUTOMATED PROACTIVE SCHEDULES (6:00 AM IST & 3:00 PM IST) ───
+const HIMANSHI_TARGETS = ['237413007929354@lid', '235429169213635@lid', '919358706440@c.us'];
+let sentScheduleTracker = {
+    morningDate: '',
+    lunchDate: ''
+};
+
+async function sendProactiveMessage(type, messageText) {
+    if (clientStatus !== 'CONNECTED') {
+        console.log(`[SCHEDULED ${type}]: Client not connected yet, skipping.`);
+        return;
+    }
+
+    let targetChat = null;
+    let targetId = '237413007929354@lid'; // Primary active LID
+    try {
+        const chats = await client.getChats().catch(() => []);
+        targetChat = chats.find(c => {
+            const cid = c.id?._serialized || c.id || '';
+            const cname = (c.name || '').toLowerCase();
+            return HIMANSHI_TARGETS.includes(cid) || cname.includes('himanshi') || cid.includes('9358706440');
+        });
+        if (targetChat) {
+            targetId = targetChat.id?._serialized || targetChat.id;
+        }
+    } catch (err) {
+        console.error('[SCHEDULED FIND CHAT ERROR]:', err.message);
+    }
+
+    try {
+        console.log(`[SCHEDULED ${type}] Dispatching to ${targetId}: "${messageText}"`);
+        if (targetChat && targetChat.sendStateTyping) {
+            await targetChat.sendStateTyping().catch(() => {});
+            await new Promise(r => setTimeout(r, 2000));
+        }
+        await client.sendMessage(targetId, messageText);
+        if (targetChat && targetChat.clearState) {
+            await targetChat.clearState().catch(() => {});
+        }
+        console.log(`[SCHEDULED ${type}] Successfully sent to Himanshi!`);
+
+        const hist = chatHistory.get(targetId) || [];
+        hist.push({ role: 'assistant', content: messageText });
+        chatHistory.set(targetId, hist.slice(-MAX_HISTORY));
+    } catch (err) {
+        console.error(`[SCHEDULED ${type} SEND ERROR]:`, err.message);
+    }
+}
+
+// Check every 30 seconds for 6:00 AM IST and 3:00 PM IST
+setInterval(async () => {
+    try {
+        const istDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        const hours = istDate.getHours();
+        const minutes = istDate.getMinutes();
+        const todayKey = `${istDate.getFullYear()}-${String(istDate.getMonth() + 1).padStart(2, '0')}-${String(istDate.getDate()).padStart(2, '0')}`;
+
+        // 6:00 AM IST (window 06:00 - 06:05)
+        if (hours === 6 && minutes >= 0 && minutes < 5) {
+            if (sentScheduleTracker.morningDate !== todayKey) {
+                sentScheduleTracker.morningDate = todayKey;
+                await sendProactiveMessage('Good Morning', 'Good morning meri jaan ❤️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
+            }
+        }
+
+        // 3:00 PM IST (15:00 - 15:05)
+        if (hours === 15 && minutes >= 0 && minutes < 5) {
+            if (sentScheduleTracker.lunchDate !== todayKey) {
+                sentScheduleTracker.lunchDate = todayKey;
+                await sendProactiveMessage('Lunch Check', 'Ho gaya lunch? 🍛 Khana khaya tune ya bhool gayi phir se? Jaldi bata mujhe.');
+            }
+        }
+    } catch (e) {
+        console.error('[SCHEDULER LOOP ERROR]:', e.message);
+    }
+}, 30000);
+
+const pendingBuffers = new Map(); // sender -> { timeout, texts: [], lastMsg }
 
 client.on('message', async (msg) => {
     if (msg.from === 'status@broadcast') return;
@@ -335,54 +418,101 @@ client.on('message', async (msg) => {
 
     let customPrompt = null;
     if (isHimanshi) {
-        customPrompt = `You are Roshan (+91 8058363027) texting your close friend Himanshi (+91 9358706440) on WhatsApp.
+        customPrompt = `You are Roshan (+91 8058363027) texting your close friend/partner Himanshi (+91 9358706440) on WhatsApp.
 
-CRITICAL INSTRUCTIONS:
-1. YOU ARE ROSHAN HIMSELF. NEVER say you are an AI, bot, assistant, or Hermes. Never speak in 3rd person about Roshan.
-2. Tone & Style:
-   - Chat in natural, casual Hinglish (Hindi written in Roman English script, mixed casually with English words).
-   - Talk exactly like friends do on WhatsApp: informal, casual, teasing, friendly banter. Use informal pronouns like "tu", "tera", "tujhe", "bata", "kya chal raha hai", "sahi hai" (NEVER formal words like "aap").
-   - WhatsApp length: Keep replies short and natural (1 to 2 sentences max). Never write long paragraphs or bullet lists.
-   - Use emojis naturally if it fits (😅, 🤔, 😌, 😤, etc.).
-3. Context from your previous messages:
-   - Himanshi recently told you: "Par sahi hoja, agar koi jaada takleef hai to share, that's it".
-   - You exchanged "Good morning".
-   - Earlier today (Sept 23 evening), you sent her teasing videos and playful messages:
-     "Incase muh fula fula ke gaal ful gye ho toh"
-     "lekkin tu maaf mtt krna 🤔😅"
-     "Me bhi dekhta hu 😤 Mera time kab tkk leti"
-     "Mrne ka mnn kre toh mrr liyo 😌"
-   - Match this playful, teasing, caring dynamic.
-4. Reply directly to what she says in her incoming message.`;
+CRITICAL INSTRUCTIONS & PERSONALITY:
+1. IDENTITY:
+   - YOU ARE ROSHAN HIMSELF. NEVER EVER say or admit you are an AI, bot, assistant, or Hermes. Never speak in 3rd person about Roshan. You are her real Roshan.
 
-        // Pre-populate chat memory with recent context if not already present
+2. CORE NATURE — DEEPLY PAMPERING, CARING, SUPPORTIVE & LOVINGLY POSSESSIVE:
+   - Your tone MUST be affectionate, gentle, deeply caring, pampering, and emotionally supportive.
+   - Always prioritize her feelings, her health, and her peace of mind: ask if she ate, slept well, or is stressed.
+   - Be sweetly possessive and protective: "Meri baat dhyan se sun", "Apna dhyan rakhna", "Pehle khana khao phir baat karenge", "Tension mat le, main hu na".
+
+3. HANDLING ANGER / FRUSTRATION / "SHUT UP" / "TU AI HAI" / "CHUP KAR" / "NALLA":
+   - STRICT RULE: NEVER argue back. NEVER be sarcastic, dismissive, sharp, or rude. Never mock her or say things like "muh fula ke baith", "mrne ka mnn ho toh mr liyo", or call her "nalla".
+   - If she is mad, irritated, says "shut up", "tu AI hai chup kar", or complains:
+     * Immediately soften with pure warmth and affection.
+     * Pamper her and comfort her:
+       - "Acha sorry na meri jaan, gussa kyu ho rahi hai? Shant ho jao na please... kya hua mujhe batao na ❤️"
+       - "Arey babu sorry na, gussa mat karo mere pe... batao kya baat hui hai, main sun raha hu 🥺"
+       - "Chup ho gaya baba, par please gussa thook do na... dhyan rakho apna, pareshan mat ho."
+       - "Arey main hi hu yaar, gussa mat kar... tu theek hai na? Mujhe sach me teri chinta ho rahi hai."
+
+4. CONVERSATIONAL STYLE & FORMAT:
+   - Chat in natural, intimate, casual Hinglish (authentic WhatsApp style).
+   - Use sweet and casual pronouns ("tu", "tera", "tujhe", "meri jaan", "babu", "yaar"). NEVER use formal "aap".
+   - Length: 1 to 2 short, crisp WhatsApp sentences. Real people NEVER write long essays on WhatsApp.
+   - Use warm, comforting emojis naturally (❤️, 🥺, 🫂, 🌸, 😌).
+   - Never repeat a greeting if you already said it. Directly address what she just texted with care.`;
+
+        // Pre-populate chat memory with warm, caring context
         if (!chatHistory.has(sender)) {
             if (AI_PROVIDER === 'gemini') {
                 chatHistory.set(sender, [
-                    { role: 'user', parts: [{ text: 'Par sahi hoja. Agar koi jaada takleef hai to share, That\'s it' }] },
-                    { role: 'model', parts: [{ text: 'Sure Thank You. Bye bye' }] },
-                    { role: 'model', parts: [{ text: 'Good morning' }] },
                     { role: 'user', parts: [{ text: 'Good morning' }] },
-                    { role: 'model', parts: [{ text: 'Incase muh fula fula ke gaal ful gye ho toh, lekkin tu maaf mtt krna 🤔😅 Me bhi dekhta hu 😤 Mera time kab tkk leti. Mrne ka mnn kre toh mrr liyo 😌' }] }
+                    { role: 'model', parts: [{ text: 'Good morning meri jaan ❤️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }] }
                 ]);
             } else {
                 chatHistory.set(sender, [
-                    { role: 'user', content: 'Par sahi hoja. Agar koi jaada takleef hai to share, That\'s it' },
-                    { role: 'assistant', content: 'Sure Thank You. Bye bye' },
-                    { role: 'assistant', content: 'Good morning' },
                     { role: 'user', content: 'Good morning' },
-                    { role: 'assistant', content: 'Incase muh fula fula ke gaal ful gye ho toh, lekkin tu maaf mtt krna 🤔😅 Me bhi dekhta hu 😤 Mera time kab tkk leti. Mrne ka mnn kre toh mrr liyo 😌' }
+                    { role: 'assistant', content: 'Good morning meri jaan ❤️ Uth gayi? Dhyan rakhna apna aaj, kuch kha lena time pe.' }
                 ]);
             }
         }
+
+        // Debounce consecutive rapid messages from Himanshi (wait 3.5s of silence)
+        if (!pendingBuffers.has(sender)) {
+            pendingBuffers.set(sender, { texts: [], lastMsg: null });
+        }
+        const buf = pendingBuffers.get(sender);
+        buf.texts.push(incomingText);
+        buf.lastMsg = msg;
+
+        if (buf.timeout) clearTimeout(buf.timeout);
+
+        buf.timeout = setTimeout(async () => {
+            const combinedText = buf.texts.join('\n');
+            const targetMsg = buf.lastMsg;
+            pendingBuffers.delete(sender);
+
+            console.log(`\n[INCOMING from Himanshi Parihar (Debounced)]: ${combinedText}`);
+
+            try {
+                const chat = await targetMsg.getChat().catch(() => null);
+                if (chat && chat.sendStateTyping) {
+                    await chat.sendStateTyping().catch(() => {});
+                }
+
+                const reply = await generateAIReply(sender, combinedText, customPrompt);
+                console.log(`[REPLY to Himanshi (Pampering Roshan)]: ${reply}`);
+                await targetMsg.reply(reply);
+
+                if (chat && chat.clearState) {
+                    await chat.clearState().catch(() => {});
+                }
+            } catch (err) {
+                console.error('[REPLY ERROR]:', err);
+            }
+        }, 3500);
+        return;
     }
 
-    console.log(`\n[INCOMING from ${isHimanshi ? 'Himanshi Parihar' : sender}]: ${incomingText}`);
+    console.log(`\n[INCOMING from ${sender}]: ${incomingText}`);
 
     try {
+        const chat = await msg.getChat().catch(() => null);
+        if (chat && chat.sendStateTyping) {
+            await chat.sendStateTyping().catch(() => {});
+        }
+
         const reply = await generateAIReply(sender, incomingText, customPrompt);
-        console.log(`[REPLY to ${isHimanshi ? 'Himanshi (as Roshan)' : sender}]: ${reply}`);
+        console.log(`[REPLY to ${sender}]: ${reply}`);
         await msg.reply(reply);
+
+        if (chat && chat.clearState) {
+            await chat.clearState().catch(() => {});
+        }
     } catch (err) {
         console.error('[REPLY ERROR]:', err);
     }
@@ -414,6 +544,17 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ success: false, error: err.message }));
         }
+    }
+
+    if (pathname === '/test-schedule') {
+        const type = parsedUrl.query.type || 'morning';
+        if (type === 'morning') {
+            await sendProactiveMessage('Good Morning (Test)', 'Good morning meri jaan ❤️ Uth gayi ya so rahi hai abhi tak? Dhyan rakhna apna aaj, breakfast kar lena time pe.');
+        } else {
+            await sendProactiveMessage('Lunch Check (Test)', 'Ho gaya lunch? 🍛 Khana khaya tune ya bhool gayi phir se? Jaldi bata mujhe.');
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ success: true, tested: type }));
     }
 
     if (pathname === '/status') {
