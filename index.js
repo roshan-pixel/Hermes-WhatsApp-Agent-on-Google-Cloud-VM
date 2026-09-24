@@ -250,24 +250,47 @@ client.on('ready', async () => {
     } catch(e) {}
 });
 
-// Health check watchdog: automatically detect if WhatsApp Web reloaded/detached and cleanly restart PM2
+// Health check watchdog: detects genuine WhatsApp session loss and restarts PM2.
+// Uses a 3-strike grace counter so transient Chromium LID/out-of-sandbox frame
+// detaches (normal lifecycle noise) do NOT trigger unnecessary restarts.
+let watchdogFailCount = 0;
+const WATCHDOG_MAX_FAILURES = 3;
+
 setInterval(async () => {
+    if (clientStatus !== 'CONNECTED') {
+        watchdogFailCount = 0;
+        return;
+    }
     try {
-        if (clientStatus === 'CONNECTED') {
-            const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
-            const activePage = pages.find(p => !p.isClosed() && p.url().includes('whatsapp.com'));
-            if (!activePage || activePage.isClosed()) {
-                throw new Error('No active WhatsApp page found');
-            }
-            if (client.pupPage !== activePage) {
-                client.pupPage = activePage;
-            }
-            await activePage.evaluate(() => document.title);
+        const pages = client.pupBrowser ? await client.pupBrowser.pages() : [];
+        const activePage = pages.find(p => !p.isClosed() && p.url().includes('whatsapp.com'));
+        if (!activePage || activePage.isClosed()) {
+            throw new Error('No active WhatsApp page found');
+        }
+        if (client.pupPage !== activePage) {
+            client.pupPage = activePage;
+        }
+        await activePage.evaluate(() => document.title);
+
+        if (watchdogFailCount > 0) {
+            console.log(`[WATCHDOG] Health restored after ${watchdogFailCount} transient error(s). Counter reset.`);
+            watchdogFailCount = 0;
         }
     } catch(err) {
-        console.error('[WATCHDOG]: Detached frame or session issue detected:', err.message);
-        console.log('[WATCHDOG] Triggering clean restart to reconnect fresh session...');
-        process.exit(1);
+        watchdogFailCount++;
+        const isTransient = err.message.includes('detached') ||
+                            err.message.includes('out of sandbox') ||
+                            err.message.includes('Target closed') ||
+                            err.message.includes('Session closed');
+
+        console.warn(`[WATCHDOG] Failure #${watchdogFailCount}/${WATCHDOG_MAX_FAILURES}: ${err.message}`);
+
+        if (watchdogFailCount >= WATCHDOG_MAX_FAILURES) {
+            console.error('[WATCHDOG] 3 consecutive failures — confirmed session loss. Triggering clean restart...');
+            process.exit(1);
+        } else if (isTransient) {
+            console.log('[WATCHDOG] Transient frame/sandbox error — tolerating, will retry next cycle.');
+        }
     }
 }, 30000);
 
