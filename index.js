@@ -398,16 +398,17 @@ client.on('message', async (msg) => {
     const sender = msg.from;
     const incomingText = msg.body.trim();
 
-    // ─── STRICT WHITELIST: Only reply to 9358706440 (Himanshi), 8529911832 (Roshan), & 9549477444 (Dilip Singh) ───
+    // ─── STRICT WHITELIST: Only reply to known contacts ───
     const allowedLIDs = [
         '235429169213635@lid', // Himanshi Parihar
         '254975783530728@lid', // Roshan Airtel
-        '237413007929354@lid'  // Dilip Singh
+        '237413007929354@lid'  // Dilip Singh (father)
     ];
     const allowedNumbers = [
         '9358706440', '919358706440', // Himanshi
         '8529911832', '918529911832', // Roshan
-        '9549477444', '919549477444'  // Dilip Singh
+        '9549477444', '919549477444', // Dilip Singh (father)
+        '7976765590', '917976765590'  // Mother
     ];
 
     let contactNum = '';
@@ -431,6 +432,7 @@ client.on('message', async (msg) => {
                         chatTitle.toLowerCase().includes('himanshi') ||
                         contactName.toLowerCase().includes('himanshi')) &&
                        !sender.includes('9549477444') &&
+                       !sender.includes('7976765590') &&
                        sender !== '237413007929354@lid';
 
     const isRoshan = sender === '254975783530728@lid' ||
@@ -445,7 +447,10 @@ client.on('message', async (msg) => {
                     chatTitle.toLowerCase().includes('dilip') ||
                     contactName.toLowerCase().includes('dilip');
 
-    const isAllowed = isHimanshi || isRoshan || isDilip;
+    const isMother = sender.includes('7976765590') ||
+                     contactNum.includes('7976765590');
+
+    const isAllowed = isHimanshi || isRoshan || isDilip || isMother;
 
     if (!isAllowed) {
         console.log(`[FILTERED / IGNORED]: Message from ${sender} (Chat: "${chatTitle}", Contact: "${contactName}") - Not in allowed whitelist.`);
@@ -461,6 +466,14 @@ CRITICAL INSTRUCTIONS:
 2. Never use any informal words, slang, casual banter, teasing, emojis, or sweet nicknames.
 3. Content: Keep answers concise, formal, and helpful. If he is asking for Roshan or needs something, politely let him know that his message has been noted and Roshan will connect with him shortly.
 4. WhatsApp Length: 1 to 2 short formal sentences maximum.`;
+    } else if (isMother) {
+        customPrompt = `You are replying on behalf of Roshan to his Mother (+91 7976765590) on WhatsApp.
+
+CRITICAL INSTRUCTIONS:
+1. Tone: Warm, loving, respectful, and caring. Use respectful Hindi/English ("aap", "ji", "maa").
+2. Never use informal slang, teasing, or casual banter. Be gentle, polite, and affectionate like a good son.
+3. Content: Keep replies concise, kind, and helpful. If she is asking about Roshan or something he needs to handle, let her know the message has been noted and Roshan will call or respond to her soon.
+4. WhatsApp Length: 1 to 2 short warm sentences maximum.`;
     } else if (isHimanshi) {
         customPrompt = `You are Roshan (+91 8058363027) texting your close friend/partner Himanshi (+91 9358706440) on WhatsApp.
 
