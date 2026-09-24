@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes-WhatsApp-Agent-on-Google-Cloud-VM — Complete Call Flow &amp; Architecture Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #0f172a; --surface: #1e293b; --border: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+  --warn: #fbbf24; --err: #f87171; --ok: #34d399;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 2.4rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.7rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+h3 { font-size: 1.25rem; margin: 32px 0 12px; color: var(--accent); }
+h4 { font-size: 1.05rem; margin: 20px 0 8px; color: var(--warn); }
+p { margin: 8px 0; color: var(--muted); }
+.subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 32px; }
+.mermaid { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+.mermaid.is-enhanced { padding: 0; overflow: hidden; min-height: 260px; }
+.mermaid-viewport { padding: 54px 24px 24px; overflow: hidden; cursor: grab; touch-action: none; min-height: 260px; }
+.mermaid-viewport.is-dragging { cursor: grabbing; }
+.mermaid-viewport svg { max-width: none !important; height: auto; transform-origin: 0 0; transition: transform 120ms ease; }
+.mermaid-toolbar { position: absolute; top: 10px; right: 10px; z-index: 3; display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(15,23,42,0.92); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.mermaid-toolbar button, .mermaid-toolbar .zoom-level { height: 28px; min-width: 32px; border: 1px solid var(--border); border-radius: 6px; background: #1e293b; color: var(--text); font: 600 0.78rem system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; }
+.mermaid-toolbar button { cursor: pointer; }
+.mermaid-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+.mermaid-toolbar .zoom-level { min-width: 52px; color: var(--muted); background: transparent; }
+.call-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+.call-table th { background: #1a2744; color: var(--accent); text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+.call-table td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+.call-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+.tag-async { background: #7c3aed33; color: #a78bfa; }
+.tag-class { background: #05966933; color: var(--ok); }
+.tag-func { background: #2563eb33; color: var(--accent); }
+.tag-cmd { background: #d9770633; color: var(--warn); }
+.tag-endpoint { background: #dc262633; color: var(--err); }
+.tag-hook { background: #db277733; color: #f472b6; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 16px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 16px 0; }
+.arrow-chain { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--accent); padding: 10px; background: rgba(56,189,248,0.06); border-radius: 6px; }
+code { font-family: 'Fira Code', 'Cascadia Code', monospace; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+ul, ol { margin: 8px 0 8px 24px; color: var(--muted); }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.nav { position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.9rem; }
+.nav a { text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+@media (max-width: 768px) { .container { padding: 16px; } h1 { font-size: 1.8rem; } }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Hermes-WhatsApp-Agent-on-Google-Cloud-VM — Complete Call Flow &amp; Architecture Documentation</h1>
+<p class="subtitle">Generated from graphify knowledge graph: 98 nodes, 112 edges, 9 communities. Commit: 46c1083</p>
+
+<div class="nav">
+    <a href="#overview">Architecture Overview</a>
+    <a href="#build-graph">Graph Build</a>
+    <a href="#cli-skills">CLI &amp; Skill Installers</a>
+    <a href="#ingest-cache-update">Ingestion &amp; Updates</a>
+    <a href="#security-global">Security &amp; Global Graph</a>
+    <a href="#community-0">Community 0</a>
+    <a href="#community-5">Community 5</a>
+    <a href="#community-7">Community 7</a>
+</div>
+
+<!-- ====== Architecture Overview ====== -->
+<h2 id="overview">1. Architecture Overview</h2>
+
+<div class="mermaid">
+
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    BUILD_GRAPH_321CBB04("Graph Build<br/><small>18 nodes</small>")
+    class BUILD_GRAPH_321CBB04 module;
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>13 nodes</small>")
+    class CLI_SKILLS_9964CBB8 module;
+    INGEST_CACHE_UPDATE_FF457338("Ingestion &amp; Updates<br/><small>24 nodes</small>")
+    class INGEST_CACHE_UPDATE_FF457338 module;
+    SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>6 nodes</small>")
+    class SECURITY_GLOBAL_5B9C6A04 module;
+    COMMUNITY_0_B056AD3D("Community 0<br/><small>22 nodes</small>")
+    class COMMUNITY_0_B056AD3D module;
+    COMMUNITY_5_2966028D("Community 5<br/><small>8 nodes</small>")
+    class COMMUNITY_5_2966028D module;
+    COMMUNITY_7_989501FC("Community 7<br/><small>7 nodes</small>")
+    class COMMUNITY_7_989501FC module;
+    CLI_SKILLS_9964CBB8 -->|contains x6| INGEST_CACHE_UPDATE_FF457338
+    CLI_SKILLS_9964CBB8 -->|contains x2| COMMUNITY_7_989501FC
+    CLI_SKILLS_9964CBB8 -->|contains| BUILD_GRAPH_321CBB04
+    CLI_SKILLS_9964CBB8 -->|contains| COMMUNITY_5_2966028D
+    CLI_SKILLS_9964CBB8 -->|contains| SECURITY_GLOBAL_5B9C6A04
+    COMMUNITY_7_989501FC -->|contains| COMMUNITY_5_2966028D
+    COMMUNITY_7_989501FC -->|contains| INGEST_CACHE_UPDATE_FF457338
+    BUILD_GRAPH_321CBB04 -->|contains| INGEST_CACHE_UPDATE_FF457338
+    INGEST_CACHE_UPDATE_FF457338 -->|contains| SECURITY_GLOBAL_5B9C6A04
+    SECURITY_GLOBAL_5B9C6A04 -->|contains| INGEST_CACHE_UPDATE_FF457338
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h4>Architecture Layers</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
+      <tr><td>Graph Build</td><td>18</td><td><code>2, 8</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>13</td><td><code>1</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>24</td><td><code>3, 6</code></td></tr><tr><td>Security &amp; Global Graph</td><td>6</td><td><code>4</code></td></tr><tr><td>Community 0</td><td>22</td><td><code>0</code></td></tr><tr><td>Community 5</td><td>8</td><td><code>5</code></td></tr><tr><td>Community 7</td><td>7</td><td><code>7</code></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Core Flow</h4>
+    <div class="arrow-chain">CLI &amp; Skill Installers -&gt; Ingestion &amp; Updates -&gt; Security &amp; Global Graph -&gt; Graph Build -&gt; Community 0 -&gt; Community 5 -&gt; Community 7</div>
+  </div>
+</div>
+<div class="grid">
+  <div class="card">
+    <h4>Graph Report Highlights</h4>
+    <ul>
+      <li>98 nodes · 112 edges · 9 communities</li>
+      <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
+      <li>Token cost: 0 input · 0 output</li>
+      <li>1. `🏛️ Hermes WhatsApp AI Agent on Google Cloud VM` - 21 edges</li>
+      <li>2. `🛠️ Core Engineering Highlights` - 6 edges</li>
+      <li>3. `🧩 Architectural Component Decomposition` - 6 edges</li>
+    </ul>
+  </div>
+</div>
+<hr>
+<!-- ====== 2. Graph Build ====== -->
+<h2 id="build-graph">2. Graph Build</h2>
+<p>Graph Build groups implementation around packagejson, readmemd, graph, qrcode, mostly in package.json, README.md. This section covers 18 nodes and 16 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Graph Build (18 nodes, 16 edges)
+    subgraph build_graph_package_json_4e40bfbd["package.json"]
+        package_json_ae96f451("package.json")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f("dependencies<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_35ce5d61("scripts<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_06fa4b70("name<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_3b6e4bdf("version<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_49bee620("description<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_b59f1a7c("main<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_f20ebf38("start<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_2bbfeb0a("dotenv<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_893a1fc2("qrcode<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_75e2201f("qrcode-terminal<br/><small>package.json</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_package_9f166958("whatsapp-web.js<br/><small>package.json</small>")
+    end
+    subgraph build_graph_README_md_df5bf028["README.md"]
+        hermes_whatsapp_agent_on_google_cloud_vm_readme_52a47eca("🕸️ Graphify Knowledge Graph &amp; Codebase...<br/><small>README.md</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_readme_26f7565c("Graphify CLI Query Cheat Sheet<br/><small>README.md</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_readme_cab9dedb("Graph Architecture Metrics<br/><small>README.md</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_readme_bf73bf6e("Interactive Graph Artifacts<br/><small>README.md</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_readme_986d5ebb("Navigating Communities<br/><small>README.md</small>")
+        hermes_whatsapp_agent_on_google_cloud_vm_readme_173330dc("code:powershell ( Re-extract and updat...<br/><small>README.md</small>")
+    end
+    package_json_ae96f451 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_06fa4b70
+    package_json_ae96f451 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_3b6e4bdf
+    package_json_ae96f451 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_49bee620
+    package_json_ae96f451 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_b59f1a7c
+    package_json_ae96f451 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_35ce5d61
+    package_json_ae96f451 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f
+    hermes_whatsapp_agent_on_google_cloud_vm_package_35ce5d61 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_f20ebf38
+    hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_2bbfeb0a
+    hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_893a1fc2
+    hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_75e2201f
+    hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_package_9f166958
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_52a47eca -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_cab9dedb
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_52a47eca -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_bf73bf6e
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_52a47eca -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_986d5ebb
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_52a47eca -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_26f7565c
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_26f7565c -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_173330dc
+    class package_json_ae96f451 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_c939dd8f function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_35ce5d61 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_06fa4b70 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_3b6e4bdf function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_49bee620 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_b59f1a7c function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_f20ebf38 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_2bbfeb0a function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_893a1fc2 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_75e2201f function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_package_9f166958 module;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_52a47eca concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_26f7565c concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_cab9dedb concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_bf73bf6e concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_986d5ebb concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_173330dc concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>package.json</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>package.json node in package.json.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>name</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>name node in package.json.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>version</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>version node in package.json.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>description</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>description node in package.json.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>main</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>main node in package.json.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>scripts</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>scripts node in package.json.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>start</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>start node in package.json.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>dependencies</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>dependencies node in package.json.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>dotenv</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>dotenv node in package.json.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>qrcode</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>qrcode node in package.json.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>qrcode-terminal</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>qrcode-terminal node in package.json.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>whatsapp-web.js</code><br><small style="color:var(--muted)">package.json</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>whatsapp-web.js node in package.json.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>🕸️ Graphify Knowledge Graph &amp; Codebase Navigation</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🕸️ Graphify Knowledge Graph &amp; Codebase Navigation.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Graph Architecture Metrics</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Graph Architecture Metrics.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>Interactive Graph Artifacts</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Interactive Graph Artifacts.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Navigating Communities</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Navigating Communities.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>Graphify CLI Query Cheat Sheet</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Graphify CLI Query Cheat Sheet.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>code:powershell (# Re-extract and update graph after making code modification)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:powershell (# Re-extract and update graph after making code modification).</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>package.json</code></td><td>12 nodes</td></tr>
+<tr><td><code>README.md</code></td><td>6 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x16. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 3. CLI & Skill Installers ====== -->
+<h2 id="cli-skills">3. CLI &amp; Skill Installers</h2>
+<p>CLI &amp; Skill Installers groups implementation around readmemd, agent, system, architecture, mostly in README.md. This section covers 13 nodes and 13 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: CLI &amp; Skill Installers (13 nodes, 13 edges)
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5("🏛️ Hermes WhatsApp AI Agent on Google C...<br/><small>README.md</small>")
+    readme_md_eeb98ce0("README.md")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_c2243d54("code:block1 (+─────────────────────────...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_63b3f5da("🕹️ Operations &amp; Diagnostic Cheatsheet<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a8eb3f3a("📐 System Architecture Diagram<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_1856ea7b("🚀 Latest Releases &amp; Engineering Updates<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_ea2604db("📐 Systematic System Architecture<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_de7089d2("code:powershell ( 1. Check live agent...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_76bbe881("⚡ Applied Performance MODS &amp; Optimizations<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_20214557("🌐 HTTP Management &amp; Diagnostic API Refe...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_17f7e07b("🎭 Contact Routing &amp; Isolation Matrix<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_9c569cc6("📄 License<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_bcf377eb("🔒 Security &amp; Data Privacy<br/><small>README.md</small>")
+    readme_md_eeb98ce0 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_1856ea7b
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_a8eb3f3a
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_17f7e07b
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_20214557
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_63b3f5da
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_bcf377eb
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9c569cc6
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_ea2604db
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_76bbe881
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a8eb3f3a -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_c2243d54
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_c2243d54 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_ea2604db
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_63b3f5da -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_de7089d2
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_2ddedac5 concept;
+    class readme_md_eeb98ce0 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_c2243d54 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_63b3f5da concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_a8eb3f3a concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_1856ea7b concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_ea2604db concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_de7089d2 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_76bbe881 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_20214557 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_17f7e07b concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_9c569cc6 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_bcf377eb concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>README.md</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing README.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>🏛️ Hermes WhatsApp AI Agent on Google Cloud VM</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🏛️ Hermes WhatsApp AI Agent on Google Cloud VM.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>🚀 Latest Releases &amp; Engineering Updates</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🚀 Latest Releases &amp; Engineering Updates.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>📐 System Architecture Diagram</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📐 System Architecture Diagram.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>code:block1 (+───────────────────────────────────────────────────────────)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:block1 (+───────────────────────────────────────────────────────────).</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>🎭 Contact Routing &amp; Isolation Matrix</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🎭 Contact Routing &amp; Isolation Matrix.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>🌐 HTTP Management &amp; Diagnostic API Reference</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🌐 HTTP Management &amp; Diagnostic API Reference.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>🕹️ Operations &amp; Diagnostic Cheatsheet</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🕹️ Operations &amp; Diagnostic Cheatsheet.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>code:powershell (# 1. Check live agent status, memory usage, and uptime)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:powershell (# 1. Check live agent status, memory usage, and uptime).</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>🔒 Security &amp; Data Privacy</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🔒 Security &amp; Data Privacy.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>📄 License</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📄 License.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>📐 Systematic System Architecture</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📐 Systematic System Architecture.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>⚡ Applied Performance MODS &amp; Optimizations</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing ⚡ Applied Performance MODS &amp; Optimizations.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>13 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x13. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 4. Ingestion & Updates ====== -->
+<h2 id="ingest-cache-update">4. Ingestion &amp; Updates</h2>
+<p>Ingestion &amp; Updates groups implementation around readmemd, compute, engine, step, mostly in README.md. This section covers 24 nodes and 24 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Ingestion &amp; Updates (24 nodes, 24 edges)
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_40235810("🛠️ Step-by-Step Deployment &amp; Setup Guide<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_e3ea7415("📲 WhatsApp Multi-Device Linking Protocol<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_cc737fea("2. Static External IP Reservation<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d977ea1a("3. Connect via SSH &amp; Install Dependencies<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d4c9a274("Option A: 8-Digit Pairing Code (Recomme...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_abcdc659("🛠️ Step-by-Step Deployment &amp; Configuration<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_9d791a2c("3. Server Initialization &amp; Dependency I...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_f12f00d0("1. Provision the Google Cloud Compute E...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_4fd955fa("1. Provisioning the Google Cloud Comput...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_882a9c73("Option B: Terminal ASCII QR Code<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a26c6f99("code:bash (gcloud compute addresses cre...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_50b79f8e("code:bash (gcloud compute instances cre...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2e712d36("code:bash (sudo apt update &amp;&amp; sudo apt...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_75650add("code:block6 (+─────────────────────────...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_69e0f4f7("code:powershell (ssh -i '$env:USERPROFI...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_ebf056b8("code:powershell (ssh -i '$env:USERPROFI...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_e70fd754("⚙️ Configuration &amp; Environment Setup<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_0e3c0f2b("Option A: Read QR Code directly in Powe...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_75650add -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9d791a2c
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_40235810 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_f12f00d0
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_40235810 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_cc737fea
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_40235810 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_d977ea1a
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_f12f00d0 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_50b79f8e
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_50b79f8e -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9d791a2c
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_cc737fea -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_a26c6f99
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_cc737fea -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_abcdc659
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a26c6f99 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_e70fd754
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d977ea1a -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_69e0f4f7
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d977ea1a -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_2e712d36
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_69e0f4f7 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_e70fd754
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2e712d36 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_0e3c0f2b
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_e3ea7415 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_d4c9a274
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_e3ea7415 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_882a9c73
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d4c9a274 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_ebf056b8
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_abcdc659 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_4fd955fa
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_abcdc659 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9d791a2c
+    %% Omitted for readability: 6 nodes, 0 edges
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_40235810 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_e3ea7415 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_cc737fea concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_d977ea1a concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_d4c9a274 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_abcdc659 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_9d791a2c concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_f12f00d0 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_4fd955fa concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_882a9c73 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_a26c6f99 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_50b79f8e concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_2e712d36 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_75650add concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_69e0f4f7 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_ebf056b8 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_e70fd754 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_0e3c0f2b concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>code:mermaid (sequenceDiagram)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:mermaid (sequenceDiagram).</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>🖥️ Compute Engine Hardware &amp; Kernel Performance Topology</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🖥️ Compute Engine Hardware &amp; Kernel Performance Topology.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>code:block6 (+───────────────────────────────────────────────────────────)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:block6 (+───────────────────────────────────────────────────────────).</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>🛠️ Step-by-Step Deployment &amp; Setup Guide</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🛠️ Step-by-Step Deployment &amp; Setup Guide.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>1. Provision the Google Cloud Compute Engine VM</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 1. Provision the Google Cloud Compute Engine VM.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>code:bash (gcloud compute instances create hermes-whatsapp-agent \)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (gcloud compute instances create hermes-whatsapp-agent \).</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>2. Static External IP Reservation</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2. Static External IP Reservation.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>code:bash (gcloud compute addresses create hermes-static-ip \)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (gcloud compute addresses create hermes-static-ip \).</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>3. Connect via SSH &amp; Install Dependencies</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3. Connect via SSH &amp; Install Dependencies.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>code:powershell (ssh -i &quot;$env:USERPROFILE\.ssh\google_compute_engine&quot; sgarm@1)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:powershell (ssh -i &quot;$env:USERPROFILE\.ssh\google_compute_engine&quot; sgarm@1).</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>code:bash (sudo apt update &amp;&amp; sudo apt upgrade -y)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (sudo apt update &amp;&amp; sudo apt upgrade -y).</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>🛠️ Step-by-Step Deployment &amp; Configuration</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🛠️ Step-by-Step Deployment &amp; Configuration.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>1. Provisioning the Google Cloud Compute Engine VM</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 1. Provisioning the Google Cloud Compute Engine VM.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>3. Server Initialization &amp; Dependency Installation</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3. Server Initialization &amp; Dependency Installation.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>⚙️ Configuration &amp; Environment Setup</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing ⚙️ Configuration &amp; Environment Setup.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Option A: Read QR Code directly in PowerShell</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option A: Read QR Code directly in PowerShell.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>📲 WhatsApp Multi-Device Linking Protocol</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📲 WhatsApp Multi-Device Linking Protocol.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Option A: 8-Digit Pairing Code (Recommended - Zero Camera Scanning)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option A: 8-Digit Pairing Code (Recommended - Zero Camera Scanning).</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>code:powershell (ssh -i &quot;$env:USERPROFILE\.ssh\google_compute_engine&quot; -L 3000)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:powershell (ssh -i &quot;$env:USERPROFILE\.ssh\google_compute_engine&quot; -L 3000).</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>code:block14 (http://localhost:3000/pair-code?phone=918058363027)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:block14 (http://localhost:3000/pair-code?phone=918058363027).</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>Option B: Terminal ASCII QR Code</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option B: Terminal ASCII QR Code.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>code:powershell (ssh -i &quot;$env:USERPROFILE\.ssh\google_compute_engine&quot; sgarm@1)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:powershell (ssh -i &quot;$env:USERPROFILE\.ssh\google_compute_engine&quot; sgarm@1).</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>Option C: Browser Visual QR</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option C: Browser Visual QR.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>🕹️ Operations &amp; Maintenance Cheatsheet</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🕹️ Operations &amp; Maintenance Cheatsheet.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>24 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x24. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 5. Security & Global Graph ====== -->
+<h2 id="security-global">5. Security &amp; Global Graph</h2>
+<p>Security &amp; Global Graph groups implementation around readmemd, clone, hermes, whatsapp, mostly in README.md. This section covers 6 nodes and 6 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Security &amp; Global Graph (6 nodes, 6 edges)
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7d4fe452("4. Clone Repository &amp; Setup Environment<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_44543705("📲 WhatsApp Pairing &amp; QR Code Protocol<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_f64cc016("code:bash (git clone https://github.com...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_eb0cde37("code:env ( Primary AI Provider: 'deeps...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_9e3c18d5("Option B: Local Browser Forwarding<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_4bb573ae("⚠️ Resolving 'Cannot link new devices,...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7d4fe452 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_f64cc016
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7d4fe452 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_eb0cde37
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_f64cc016 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9e3c18d5
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_eb0cde37 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_4bb573ae
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_44543705 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9e3c18d5
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_44543705 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_4bb573ae
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_7d4fe452 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_44543705 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_f64cc016 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_eb0cde37 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_9e3c18d5 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_4bb573ae concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>4. Clone Repository &amp; Setup Environment</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4. Clone Repository &amp; Setup Environment.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>code:bash (git clone https://github.com/roshan-pixel/Hermes-WhatsApp-Ag)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (git clone https://github.com/roshan-pixel/Hermes-WhatsApp-Ag).</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>code:env (# Primary AI Provider: &#x27;deepseek&#x27;, &#x27;gemini&#x27;, or &#x27;hermes&#x27;)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:env (# Primary AI Provider: &#x27;deepseek&#x27;, &#x27;gemini&#x27;, or &#x27;hermes&#x27;).</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>📲 WhatsApp Pairing &amp; QR Code Protocol</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 📲 WhatsApp Pairing &amp; QR Code Protocol.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Option B: Local Browser Forwarding</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Option B: Local Browser Forwarding.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>⚠️ Resolving &quot;Cannot link new devices, try again later&quot;</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing ⚠️ Resolving &quot;Cannot link new devices, try again later&quot;.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>6 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x6. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 6. Community 0 ====== -->
+<h2 id="community-0">6. Community 0</h2>
+<p>Community 0 groups implementation around indexjs, client, http, url, mostly in index.js. This section covers 22 nodes and 24 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 0 (22 nodes, 24 edges)
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_826b36f7("getDeepSeekReply()<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_3dab2d3c("getGeminiReply()<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_862b58fd("getHermesReply()<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_6edeb1a5("generateAIReply()<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_a_079719e6("AI_PROVIDER<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_q_5a119538("QRCode<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_a_51e4cadb("activePage<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_a_5f366ed9("allowedLIDs<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_a_d04801b1("allowedNumbers<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_b_6b3b4866("buf<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_c_0802bdab("chatHistory<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_c_c46dc866("client<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_c_f8ee9bcc("combinedText<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_f_d9cb526b("fs<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_h_54610232("http<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_i_5db4f971("incomingText<br/><small>index.js</small>")
+    index_js_71daa22e("index.js")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_p_61c45252("pendingBuffers<br/><small>index.js</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_826b36f7 -->|calls| hermes_whatsapp_agent_on_google_cloud_vm_index_g_6edeb1a5
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_3dab2d3c -->|calls| hermes_whatsapp_agent_on_google_cloud_vm_index_g_6edeb1a5
+    hermes_whatsapp_agent_on_google_cloud_vm_index_g_862b58fd -->|calls| hermes_whatsapp_agent_on_google_cloud_vm_index_g_6edeb1a5
+    %% Omitted for readability: 4 nodes, 0 edges
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_g_826b36f7 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_g_3dab2d3c function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_g_862b58fd function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_g_6edeb1a5 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_a_079719e6 klass;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_q_5a119538 klass;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_a_51e4cadb function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_a_5f366ed9 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_a_d04801b1 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_b_6b3b4866 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_c_0802bdab function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_c_c46dc866 entry;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_c_f8ee9bcc function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_f_d9cb526b function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_h_54610232 function;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_i_5db4f971 function;
+    class index_js_71daa22e module;
+    class hermes_whatsapp_agent_on_google_cloud_vm_index_p_61c45252 function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>index.js</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>index.js node in index.js.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>http</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>http node in index.js.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>url</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>url node in index.js.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>fs</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>fs node in index.js.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>{ Client, LocalAuth }</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-cmd">Entry</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>{ Client, LocalAuth } node in index.js.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>qrcodeTerminal</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>qrcodeTerminal node in index.js.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>QRCode</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>QRCode node in index.js.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>AI_PROVIDER</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>AI_PROVIDER node in index.js.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>chatHistory</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>getDeepSeekReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>generateAIReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td>getDeepSeekReply() node in index.js.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>getGeminiReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>generateAIReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td>getGeminiReply() node in index.js.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>getHermesReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>generateAIReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td>getHermesReply() node in index.js.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>generateAIReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>getDeepSeekReply()</code><br><small style="color:var(--muted)">index.js</small><br><code>getGeminiReply()</code><br><small style="color:var(--muted)">index.js</small><br><code>getHermesReply()</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>generateAIReply() node in index.js.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>client</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-cmd">Entry</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>client node in index.js.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>activePage</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Organizes documentation pages, navigation, or content lookup.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>pendingBuffers</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>pendingBuffers node in index.js.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>incomingText</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>incomingText node in index.js.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>allowedLIDs</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>allowedLIDs node in index.js.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>allowedNumbers</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>allowedNumbers node in index.js.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>buf</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>buf node in index.js.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>combinedText</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>combinedText node in index.js.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>server</code><br><small style="color:var(--muted)">index.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>server node in index.js.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>index.js</code></td><td>22 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x21, calls x3. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 7. Community 5 ====== -->
+<h2 id="community-5">7. Community 5</h2>
+<p>Community 5 groups implementation around readmemd, watchdog, high, resilience, mostly in README.md. This section covers 8 nodes and 7 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 5 (8 nodes, 7 edges)
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463("🧩 Architectural Component Decomposition<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a51b6083("2. High-Resilience 3-Strike Grace Watchdog<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_9801c8df("code:javascript (// Health check watchd...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_c87a91ac("5. Hardware &amp; OS Kernel Performance Top...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_4ab4f021("1. Communication Gateway &amp; Transport Layer<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a2928edc("2. Message Ingestion &amp; Guardrail Pipeline<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_fe450eb8("3. Cognitive Engine &amp; Context State Buffer<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_2a2ea8cb("4. Process Supervision &amp; Self-Healing (...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_a51b6083 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_9801c8df
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_9801c8df -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_c87a91ac
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_4ab4f021
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_a2928edc
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_fe450eb8
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_2a2ea8cb
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_c87a91ac
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_d60f3463 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_a51b6083 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_9801c8df concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_c87a91ac concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_4ab4f021 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_a2928edc concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_fe450eb8 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_2a2ea8cb concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>2. High-Resilience 3-Strike Grace Watchdog</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2. High-Resilience 3-Strike Grace Watchdog.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>code:javascript (// Health check watchdog: evaluates active page DOM title ev)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:javascript (// Health check watchdog: evaluates active page DOM title ev).</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>🧩 Architectural Component Decomposition</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🧩 Architectural Component Decomposition.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>1. Communication Gateway &amp; Transport Layer</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 1. Communication Gateway &amp; Transport Layer.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>2. Message Ingestion &amp; Guardrail Pipeline</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2. Message Ingestion &amp; Guardrail Pipeline.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>3. Cognitive Engine &amp; Context State Buffer</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3. Cognitive Engine &amp; Context State Buffer.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>4. Process Supervision &amp; Self-Healing (PM2)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4. Process Supervision &amp; Self-Healing (PM2).</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>5. Hardware &amp; OS Kernel Performance Topology</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 5. Hardware &amp; OS Kernel Performance Topology.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>8 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x7. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 8. Community 7 ====== -->
+<h2 id="community-7">8. Community 7</h2>
+<p>Community 7 groups implementation around readmemd, simulation, end, engineering, mostly in README.md. This section covers 7 nodes and 6 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 7 (7 nodes, 6 edges)
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7fa33ce3("🛠️ Core Engineering Highlights<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_5299780a("3. Rapid Debouncer &amp; Real-Time Typing S...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_49561d30("code:block3 (Himanshi: Sun)<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_b9b225ff("1. 100% Purely Reactive Architecture<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_abfaeb78("4. 24/7 Presence Engine &amp; Synthetic Foc...<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_6310a956("5. Multi-Device Phone Pairing Code API<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_315ccbf9("🔄 End-to-End Sequence Flow<br/><small>README.md</small>")
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7fa33ce3 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_b9b225ff
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7fa33ce3 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_5299780a
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7fa33ce3 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_abfaeb78
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_7fa33ce3 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_6310a956
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_5299780a -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_49561d30
+    hermes_whatsapp_agent_on_google_cloud_vm_readme_49561d30 -->|contains| hermes_whatsapp_agent_on_google_cloud_vm_readme_315ccbf9
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_7fa33ce3 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_5299780a concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_49561d30 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_b9b225ff concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_abfaeb78 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_6310a956 concept;
+    class hermes_whatsapp_agent_on_google_cloud_vm_readme_315ccbf9 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>🛠️ Core Engineering Highlights</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🛠️ Core Engineering Highlights.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>1. 100% Purely Reactive Architecture</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 1. 100% Purely Reactive Architecture.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>3. Rapid Debouncer &amp; Real-Time Typing Simulation</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 3. Rapid Debouncer &amp; Real-Time Typing Simulation.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>code:block3 (Himanshi: Sun)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:block3 (Himanshi: Sun).</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>4. 24/7 Presence Engine &amp; Synthetic Focus Simulation</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 4. 24/7 Presence Engine &amp; Synthetic Focus Simulation.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>5. Multi-Device Phone Pairing Code API</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 5. Multi-Device Phone Pairing Code API.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>🔄 End-to-End Sequence Flow</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 🔄 End-to-End Sequence Flow.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>7 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x6. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<h2 id="stats">Project Statistics</h2>
+
+<div class="grid">
+  <div class="card">
+    <h4>Graph</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>Nodes</td><td>98</td></tr>
+      <tr><td>Edges</td><td>112</td></tr>
+      <tr><td>Hyperedges</td><td>0</td></tr>
+      <tr><td>Communities</td><td>9</td></tr>
+      <tr><td>Documented Sections</td><td>7</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Edge Confidence</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>EXTRACTED</td><td>112</td></tr>
+      <tr><td>INFERRED</td><td>0</td></tr>
+      <tr><td>AMBIGUOUS</td><td>0</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
+  <p>Hermes-WhatsApp-Agent-on-Google-Cloud-VM — Architecture Documentation</p>
+  <p>Generated: 2026-09-24 14:13 UTC · graphify callflow-html</p>
+</div>
+
+</div><!-- .container -->
+
+<script>
+(function () {
+  const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, useMaxWidth: true },
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#38bdf8',
+      secondaryColor: '#0f172a',
+      tertiaryColor: '#334155',
+      lineColor: '#64748b',
+      textColor: '#e2e8f0',
+    }
+  };
+
+  mermaid.initialize(mermaidConfig);
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function enhanceMermaidDiagrams() {
+    document.querySelectorAll('.mermaid').forEach((container) => {
+      if (container.dataset.zoomReady === 'true') return;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      container.dataset.zoomReady = 'true';
+      container.classList.add('is-enhanced');
+
+      const viewport = document.createElement('div');
+      viewport.className = 'mermaid-viewport';
+      svg.parentNode.insertBefore(viewport, svg);
+      viewport.appendChild(svg);
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'mermaid-toolbar';
+      toolbar.innerHTML = [
+        '<button type="button" data-action="zoom-out" title="Zoom out">-</button>',
+        '<span class="zoom-level" data-role="level">100%</span>',
+        '<button type="button" data-action="zoom-in" title="Zoom in">+</button>',
+        '<button type="button" data-action="fit" title="Fit width">Fit</button>',
+        '<button type="button" data-action="reset" title="Reset view">Reset</button>'
+      ].join('');
+      container.insertBefore(toolbar, viewport);
+
+      const state = { scale: 1, x: 0, y: 0, dragging: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+      const level = toolbar.querySelector('[data-role="level"]');
+
+      function applyTransform() {
+        svg.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+        level.textContent = `${Math.round(state.scale * 100)}%`;
+      }
+
+      function zoomBy(delta) {
+        state.scale = clamp(state.scale + delta, 0.25, 3);
+        applyTransform();
+      }
+
+      function reset() {
+        state.scale = 1;
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      function fitWidth() {
+        const rawWidth = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width
+          ? svg.viewBox.baseVal.width
+          : svg.getBoundingClientRect().width / state.scale;
+        if (!rawWidth) {
+          reset();
+          return;
+        }
+        state.scale = clamp((viewport.clientWidth - 48) / rawWidth, 0.25, 1.4);
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      toolbar.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        if (action === 'zoom-in') zoomBy(0.15);
+        if (action === 'zoom-out') zoomBy(-0.15);
+        if (action === 'fit') fitWidth();
+        if (action === 'reset') reset();
+      });
+
+      viewport.addEventListener('wheel', (event) => {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        zoomBy(event.deltaY < 0 ? 0.1 : -0.1);
+      }, { passive: false });
+
+      viewport.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        state.dragging = true;
+        state.startX = event.clientX;
+        state.startY = event.clientY;
+        state.originX = state.x;
+        state.originY = state.y;
+        viewport.classList.add('is-dragging');
+        viewport.setPointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener('pointermove', (event) => {
+        if (!state.dragging) return;
+        state.x = state.originX + event.clientX - state.startX;
+        state.y = state.originY + event.clientY - state.startY;
+        applyTransform();
+      });
+
+      function endDrag(event) {
+        if (!state.dragging) return;
+        state.dragging = false;
+        viewport.classList.remove('is-dragging');
+        if (viewport.hasPointerCapture(event.pointerId)) {
+          viewport.releasePointerCapture(event.pointerId);
+        }
+      }
+
+      viewport.addEventListener('pointerup', endDrag);
+      viewport.addEventListener('pointercancel', endDrag);
+      applyTransform();
+    });
+  }
+
+  function renderMermaid() {
+    const result = mermaid.run
+      ? mermaid.run({ querySelector: '.mermaid' })
+      : Promise.resolve();
+    Promise.resolve(result)
+      .then(enhanceMermaidDiagrams)
+      .catch((error) => {
+        console.error('Mermaid render failed:', error);
+        enhanceMermaidDiagrams();
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMermaid);
+  } else {
+    renderMermaid();
+  }
+})();
+</script>
+
+</body>
+</html>
