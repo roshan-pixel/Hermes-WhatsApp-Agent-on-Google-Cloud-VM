@@ -287,7 +287,8 @@ client.on('disconnected', (reason) => {
 });
 
 // ─── AUTOMATED PROACTIVE SCHEDULES (6:00 AM IST & 3:00 PM IST) ───
-const HIMANSHI_TARGETS = ['237413007929354@lid', '235429169213635@lid', '919358706440@c.us'];
+// Only send automated morning/lunch messages to Himanshi (9358706440)
+const HIMANSHI_TARGETS = ['235429169213635@lid', '919358706440@c.us'];
 let sentScheduleTracker = {
     morningDate: '',
     lunchDate: ''
@@ -300,13 +301,14 @@ async function sendProactiveMessage(type, messageText) {
     }
 
     let targetChat = null;
-    let targetId = '237413007929354@lid'; // Primary active LID
+    let targetId = '235429169213635@lid'; // Himanshi Parihar LID
     try {
         const chats = await client.getChats().catch(() => []);
         targetChat = chats.find(c => {
             const cid = c.id?._serialized || c.id || '';
             const cname = (c.name || '').toLowerCase();
-            return HIMANSHI_TARGETS.includes(cid) || cname.includes('himanshi') || cid.includes('9358706440');
+            return (HIMANSHI_TARGETS.includes(cid) || cname.includes('himanshi') || cid.includes('9358706440')) &&
+                   !cid.includes('9549477444') && cid !== '237413007929354@lid' && !cname.includes('dilip');
         });
         if (targetChat) {
             targetId = targetChat.id?._serialized || targetChat.id;
@@ -373,13 +375,17 @@ client.on('message', async (msg) => {
     const sender = msg.from;
     const incomingText = msg.body.trim();
 
-    // ─── STRICT WHITELIST: Only reply to 9358706440 (Himanshi) & 8529911832 (Roshan) ───
+    // ─── STRICT WHITELIST: Only reply to 9358706440 (Himanshi), 8529911832 (Roshan), & 9549477444 (Dilip Singh) ───
     const allowedLIDs = [
-        '237413007929354@lid', // Himanshi Parihar (Active LID)
-        '235429169213635@lid', // Himanshi Parihar (Secondary LID)
-        '254975783530728@lid'  // Roshan Airtel
+        '235429169213635@lid', // Himanshi Parihar
+        '254975783530728@lid', // Roshan Airtel
+        '237413007929354@lid'  // Dilip Singh
     ];
-    const allowedNumbers = ['9358706440', '8529911832', '919358706440', '918529911832'];
+    const allowedNumbers = [
+        '9358706440', '919358706440', // Himanshi
+        '8529911832', '918529911832', // Roshan
+        '9549477444', '919549477444'  // Dilip Singh
+    ];
 
     let contactNum = '';
     let contactName = '';
@@ -396,12 +402,13 @@ client.on('message', async (msg) => {
         contactNum = (contact.number || '').replace(/[^\d]/g, '');
     } catch(e) {}
 
-    const isHimanshi = sender === '237413007929354@lid' ||
-                       sender === '235429169213635@lid' ||
-                       sender.includes('9358706440') ||
-                       contactNum.includes('9358706440') ||
-                       chatTitle.toLowerCase().includes('himanshi') ||
-                       contactName.toLowerCase().includes('himanshi');
+    const isHimanshi = (sender === '235429169213635@lid' ||
+                        sender.includes('9358706440') ||
+                        contactNum.includes('9358706440') ||
+                        chatTitle.toLowerCase().includes('himanshi') ||
+                        contactName.toLowerCase().includes('himanshi')) &&
+                       !sender.includes('9549477444') &&
+                       sender !== '237413007929354@lid';
 
     const isRoshan = sender === '254975783530728@lid' ||
                      sender.includes('8529911832') ||
@@ -409,7 +416,13 @@ client.on('message', async (msg) => {
                      chatTitle.toLowerCase().includes('roshan') ||
                      contactName.toLowerCase().includes('roshan');
 
-    const isAllowed = isHimanshi || isRoshan;
+    const isDilip = sender === '237413007929354@lid' ||
+                    sender.includes('9549477444') ||
+                    contactNum.includes('9549477444') ||
+                    chatTitle.toLowerCase().includes('dilip') ||
+                    contactName.toLowerCase().includes('dilip');
+
+    const isAllowed = isHimanshi || isRoshan || isDilip;
 
     if (!isAllowed) {
         console.log(`[FILTERED / IGNORED]: Message from ${sender} (Chat: "${chatTitle}", Contact: "${contactName}") - Not in allowed whitelist.`);
@@ -417,7 +430,15 @@ client.on('message', async (msg) => {
     }
 
     let customPrompt = null;
-    if (isHimanshi) {
+    if (isDilip) {
+        customPrompt = `You are replying on behalf of Roshan to Dilip Singh (+91 9549477444) on WhatsApp.
+
+CRITICAL INSTRUCTIONS:
+1. Tone: Strictly formal, polite, respectful, and professional. Use respectful Hindi/English ("aap", "ji").
+2. Never use any informal words, slang, casual banter, teasing, emojis, or sweet nicknames.
+3. Content: Keep answers concise, formal, and helpful. If he is asking for Roshan or needs something, politely let him know that his message has been noted and Roshan will connect with him shortly.
+4. WhatsApp Length: 1 to 2 short formal sentences maximum.`;
+    } else if (isHimanshi) {
         customPrompt = `You are Roshan (+91 8058363027) texting your close friend/partner Himanshi (+91 9358706440) on WhatsApp.
 
 CRITICAL INSTRUCTIONS & PERSONALITY:
@@ -499,7 +520,7 @@ CRITICAL INSTRUCTIONS & PERSONALITY:
         return;
     }
 
-    console.log(`\n[INCOMING from ${sender}]: ${incomingText}`);
+    console.log(`\n[INCOMING from ${isDilip ? 'Dilip Singh (' + sender + ')' : sender}]: ${incomingText}`);
 
     try {
         const chat = await msg.getChat().catch(() => null);
@@ -508,7 +529,7 @@ CRITICAL INSTRUCTIONS & PERSONALITY:
         }
 
         const reply = await generateAIReply(sender, incomingText, customPrompt);
-        console.log(`[REPLY to ${sender}]: ${reply}`);
+        console.log(`[REPLY to ${isDilip ? 'Dilip Singh (Formal)' : sender}]: ${reply}`);
         await msg.reply(reply);
 
         if (chat && chat.clearState) {
